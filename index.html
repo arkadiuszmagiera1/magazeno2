@@ -14,7 +14,7 @@
     --tile-border-dark: #333;
     --muted-light: rgba(0,0,0,0.6);
     --muted-dark: rgba(255,255,255,0.6);
-    --bar-gradient: linear-gradient(90deg, rgba(16,185,129,0.3), rgba(59,130,246,0.3), rgba(16,185,129,0.3));
+    --bar-gradient: linear-gradient(90deg, rgba(16,185,129,0.25), rgba(59,130,246,0.25), rgba(16,185,129,0.25));
   }
 
   * { box-sizing: border-box; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
@@ -170,7 +170,7 @@
     box-shadow: 0 8px 18px rgba(0,0,0,0.15);
   }
 
-  /* 🔹 delikatny pasek animowany u góry aktywnych kafelków */
+  /* 🔹 Pasek animowany u góry aktywnych kafelków */
   .tile.active::after {
     content: "";
     position: absolute;
@@ -242,7 +242,7 @@
     <div class="tile active" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
     <div class="tile active" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
     <div class="tile active" data-file="kalkulator_nro.html">Kalkulator NRO — zabezpieczenie przed ogniem</div>
-    <div class="tile soon" data-file="kreator_tarasu_4.html">W przygotowaniu — Kreator tarasów</div>
+    <div class="tile active" data-file="kreator_tarasu_4.html">Kreator tarasów</div>
     <div class="tile active" data-file="Wycena_KVH_BSH.html">Wycena KVH/BSH</div>
     <div class="tile soon" data-file="kafelek6.html">Kafelek 6</div>
     <div class="tile soon" data-file="kafelek7.html">Kafelek 7</div>
@@ -257,7 +257,7 @@
   </div>
 </div>
 
-<footer>Wersja 1.5 — by #ar_mag</footer>
+<footer>Wersja 1.6 — by #ar_mag</footer>
 
 <script>
 const users = ["User1#", "User2#", "User3#", "User4#", "User5#"];
