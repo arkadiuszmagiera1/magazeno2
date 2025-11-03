@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kalkulator – Drewno konstrukcyjne (KVH / KVH DUO / BSH)</title>
+<style>
+:root{
+--bg-light:#f6f7f9;--card-light:#fff;--text-light:#111;--muted-light:#666;--accent:#1f6fb0;
+--bg-dark:#0f1417;--card-dark:#111416;--text-dark:#eee;--muted-dark:#aaa;--accent-dark:#4aa3ff;
+--radius:10px;--mono:"Segoe UI", Roboto, Arial, sans-serif;
+}
+html,body{height:100%;margin:0;font-family:var(--mono);-webkit-font-smoothing:antialiased;font-size:16px;}
+body.light{background:var(--bg-light);color:var(--text-light);}
+body.light .card{background:var(--card-light);color:var(--text-light);}
+body.light .muted{color:var(--muted-light);}
+body.light .btn{background:var(--accent);color:#fff;}
+body.light .toggle{border:1px solid rgba(0,0,0,0.08);}
+body.dark{background:var(--bg-dark);color:var(--text-dark);}
+body.dark .card{background:var(--card-dark);color:var(--text-dark);}
+body.dark .muted{color:var(--muted-dark);}
+body.dark .btn{background:var(--accent-dark);color:#000;}
+body.dark .toggle{border:1px solid rgba(255,255,255,0.1);}
+body.dark select,input[type="number"]{background:#fff;color:#000;}
+.wrap{max-width:1200px;margin:20px auto;padding:18px}
+header{display:flex;align-items:center;gap:16px;justify-content:space-between;margin-bottom:14px}
+h1{font-size:22px;margin:0}
+.card{border-radius:var(--radius);padding:16px;box-shadow:0 6px 18px rgba(10,20,30,0.06)}
+.top-controls{display:flex;gap:12px;align-items:center}
+.btn{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;font-size:15px}
+.btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.1)}
+.note{font-size:14px;opacity:0.9;margin-top:6px}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:15px}
+thead th{padding:10px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.1);font-weight:700}
+tbody td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.06);vertical-align:middle;text-align:center}
+select,input[type="number"]{padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.15);min-width:80px;font-size:15px}
+.muted{font-size:13px}
+.total-row{display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:14px}
+.total-box{padding:12px 16px;border-radius:8px;background:rgba(0,0,0,0.05);font-weight:700}
+body.dark .total-box{background:rgba(255,255,255,0.2)}
+.remove-btn{background:transparent;border:1px solid rgba(0,0,0,0.1);padding:6px 8px;border-radius:6px;color:#b21;cursor:pointer}
+.switch{position: relative;display: inline-block;width: 52px;height: 28px;}
+.switch input{display:none;}
+.slider{position: absolute;cursor: pointer;inset: 0;background-color: #ccc;border-radius: 34px;transition: .4s;}
+.slider:before{position: absolute;content: "";height: 22px;width: 22px;left: 3px;bottom: 3px;background-color: white;transition: .4s;border-radius: 50%;}
+
+input:checked + .slider{background-color: var(--accent);}
+input:checked + .slider:before{transform: translateX(24px);}
+#generateMail{margin-top:24px;font-size:16px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;}
+footer{margin-top:20px;text-align:center;font-size:13px;opacity:0.7;}
+</style>
+</head>
+<body class="light">
+<div class="wrap">
+<header>
+<div>
+<h1>Kalkulator – Drewno konstrukcyjne (KVH / KVH DUO / BSH)</h1>
+<div class="note">Wybierz przekrój, długość, ilość i rabat. VAT 23% (ceny brutto w tabeli).</div>
+</div>
+<div class="top-controls">
+<label class="switch">
+<input type="checkbox" id="themeToggle" onchange="toggleTheme()" />
+<span class="slider"></span>
+</label>
+<button class="btn" onclick="addRow()">Dodaj pozycję</button>
+<button class="btn ghost" onclick="clearAll()">Wyczyść</button>
+</div>
+</header>
+<section class="card">
+<table id="calcTable">
+<thead>
+<tr>
+<th>Przekrój (mm)</th>
+<th>Rodzaj (typ)</th>
+<th>Cena za mb (brutto)</th>
+<th>Długość (m)</th>
+<th>Ilość (szt.)</th>
+<th>Rabat (%)</th>
+<th>Suma pozycji (brutto)</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+<div class="total-row">
+<div class="muted">Łączna suma brutto:</div>
+<div class="total-box" id="grandTotal">0,00 zł</div>
+</div>
+<button id="generateMail" onclick="generateMail()">Generuj treść maila</button>
+</section>
+<footer>Wersja 1.2 stworzona przez #ar_mag</footer>
+</div>
+<script>
+const woodData=[
+  {size:"40x80",type:"KVH",price:10.87},{size:"40x100",type:"KVH",price:13.58},{size:"40x120",type:"KVH",price:16.30},{size:"40x160",type:"KVH",price:21.73},{size:"40x200",type:"KVH",price:27.16},{size:"40x240",type:"KVH",price:32.60},
+  {size:"50x80",type:"KVH",price:13.00},{size:"50x100",type:"KVH",price:15.50},{size:"50x120",type:"KVH",price:18.00},{size:"50x140",type:"KVH",price:21.00},{size:"50x160",type:"KVH",price:24.00},{size:"50x180",type:"KVH",price:27.00},{size:"50x200",type:"KVH",price:30.00},{size:"50x240",type:"KVH",price:36.00},
+  {size:"60x60",type:"KVH",price:12.23},{size:"60x80",type:"KVH",price:16.30},{size:"60x100",type:"KVH",price:20.37},{size:"60x120",type:"KVH",price:24.45},{size:"60x120",type:"KVHDUO",price:27.31},{size:"60x140",type:"KVH",price:28.52},{size:"60x160",type:"KVH",price:32.60},{size:"60x180",type:"KVH",price:36.67},{size:"60x200",type:"KVH",price:40.74},{size:"60x220",type:"KVH",price:44.82},{size:"60x240",type:"KVH",price:48.89},{size:"60x260",type:"KVH",price:52.97},{size:"60x280",type:"KVH",price:57.04},{size:"60x100",type:"BSH",price:28.74},{size:"60x120",type:"BSH",price:34.49},{size:"60x140",type:"BSH",price:40.24},{size:"60x160",type:"BSH",price:45.99},{size:"60x200",type:"BSH",price:57.48},{size:"60x240",type:"BSH",price:68.98},{size:"60x280",type:"BSH",price:80.48},{size:"60x320",type:"BSH",price:91.97},
+  {size:"80x80",type:"KVH",price:21.99},{size:"80x80",type:"KVHDUO",price:24.28},{size:"80x100",type:"KVH",price:27.48},{size:"80x100",type:"BSH",price:38.32},{size:"80x120",type:"KVH",price:32.98},{size:"80x120",type:"BSH",price:45.99},{size:"80x140",type:"KVH",price:38.48},{size:"80x140",type:"BSH",price:53.65},{size:"80x160",type:"KVH",price:43.97},{size:"80x160",type:"BSH",price:61.32},{size:"80x180",type:"KVH",price:49.47},{size:"80x200",type:"KVH",price:54.96},{size:"80x200",type:"BSH",price:76.64},{size:"80x220",type:"KVH",price:60.46},{size:"80x240",type:"KVH",price:65.96},{size:"80x240",type:"BSH",price:91.97},{size:"80x280",type:"BSH",price:107.30},{size:"80x320",type:"BSH",price:122.63},
+  {size:"100x100",type:"KVH",price:34.75},{size:"100x100",type:"KVHDUO",price:37.93},{size:"100x100",type:"BSH",price:47.90},{size:"100x120",type:"KVH",price:41.70},{size:"100x140",type:"KVH",price:48.65},{size:"100x160",type:"KVH",price:55.60},{size:"100x180",type:"KVH",price:62.55},{size:"100x200",type:"KVH",price:69.50},{size:"100x220",type:"KVH",price:76.45},{size:"100x240",type:"KVH",price:83.40},{size:"100x120",type:"BSH",price:57.48},{size:"100x140",type:"BSH",price:67.06},{size:"100x160",type:"BSH",price:76.64},{size:"100x180",type:"BSH",price:86.22},{size:"100x200",type:"BSH",price:95.80},{size:"100x240",type:"BSH",price:114.96},{size:"100x280",type:"BSH",price:134.12},{size:"100x320",type:"BSH",price:153.28},
+  {size:"120x120",type:"KVH",price:51.20},{size:"120x120",type:"KVHDUO",price:54.62},{size:"120x120",type:"BSH",price:67.86},{size:"120x140",type:"KVH",price:59.73},{size:"120x160",type:"KVH",price:68.26},{size:"120x160",type:"BSH",price:90.48},{size:"120x180",type:"KVH",price:76.79},{size:"120x200",type:"KVH",price:85.32},{size:"120x200",type:"BSH",price:113.09},{size:"120x240",type:"KVH",price:102.39},{size:"120x240",type:"BSH",price:135.71},{size:"120x280",type:"KVH",price:110.92},{size:"120x280",type:"BSH",price:158.33},{size:"120x320",type:"BSH",price:180.95},{size:"120x360",type:"BSH",price:203.56},{size:"120x400",type:"BSH",price:226.18},
+  {size:"140x140",type:"KVH",price:71.25},{size:"140x140",type:"BSH",price:92.36},{size:"140x160",type:"KVH",price:81.43},{size:"140x160",type:"BSH",price:105.55},{size:"140x180",type:"KVH",price:91.61},{size:"140x200",type:"KVH",price:101.78},{size:"140x200",type:"BSH",price:131.94},{size:"140x220",type:"KVH",price:111.96},{size:"140x240",type:"KVH",price:122.14},{size:"140x240",type:"BSH",price:158.33},{size:"140x260",type:"KVH",price:132.32},{size:"140x280",type:"KVH",price:142.50},{size:"140x280",type:"BSH",price:184.72},{size:"140x320",type:"BSH",price:211.10},{size:"140x360",type:"BSH",price:237.49},{size:"140x400",type:"BSH",price:263.88},
+  {size:"160x160",type:"KVH",price:95.11},{size:"160x160",type:"BSH",price:118.58},{size:"160x180",type:"KVH",price:107.00},{size:"160x200",type:"KVH",price:118.88},{size:"160x200",type:"BSH",price:148.23},{size:"160x220",type:"KVH",price:130.77},{size:"160x240",type:"KVH",price:142.66},{size:"160x240",type:"BSH",price:177.87},{size:"160x260",type:"KVH",price:154.55},{size:"160x280",type:"KVH",price:166.44},{size:"160x280",type:"BSH",price:207.52},{size:"160x320",type:"BSH",price:237.16},{size:"160x360",type:"BSH",price:266.81},{size:"160x400",type:"BSH",price:296.45},
+  {size:"180x200",type:"BSH",price:175.60},{size:"180x240",type:"BSH",price:200.11},{size:"180x280",type:"BSH",price:233.46},{size:"180x320",type:"BSH",price:266.81},{size:"180x360",type:"BSH",price:300.16},{size:"180x400",type:"BSH",price:333.51},
+  {size:"200x200",type:"BSH",price:185.28},{size:"200x240",type:"BSH",price:222.34},{size:"200x280",type:"BSH",price:259.40},{size:"200x320",type:"BSH",price:296.45},{size:"200x360",type:"BSH",price:333.51},{size:"200x400",type:"BSH",price:370.56},{size:"200x440",type:"BSH",price:407.62},{size:"200x480",type:"BSH",price:444.68},{size:"200x520",type:"BSH",price:481.73},
+  {size:"240x240",type:"BSH",price:266.81},{size:"240x280",type:"BSH",price:311.28},{size:"240x320",type:"BSH",price:355.74},{size:"240x360",type:"BSH",price:400.21},{size:"240x400",type:"BSH",price:444.68},{size:"240x440",type:"BSH",price:489.14},{size:"240x480",type:"BSH",price:533.61}
+];
+
+const tbody=document.getElementById('tbody');
+let rowCounter=0;
+
+function createLengthOptionsHTML(){
+  let h=''; for(let m=6;m<=13.5;m+=0.5) h+=`<option value="${m.toFixed(2)}">${m.toFixed(1).replace('.',',')} m</option>`; return h;
+}
+
+function addRow(){
+  rowCounter++; const id='r'+rowCounter; const tr=document.createElement('tr'); tr.id=id;
+  const sizes=[...new Set(woodData.map(w=>w.size))].sort((a,b)=>{const [A1,A2]=a.split('x').map(Number),[B1,B2]=b.split('x').map(Number);return A1-B1||A2-B2});
+  tr.innerHTML=`
+<td><select class="selSize">${sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select></td>
+<td><select class="selType"><option value="">-- wybierz --</option><option value="KVH">KVH</option><option value="KVHDUO">KVH DUO</option><option value="BSH">BSH</option></select></td>
+<td class="tdPrice">-</td>
+<td><select class="selLength">${createLengthOptionsHTML()}</select></td>
+<td><input type="number" class="inpQty" min="0" step="1" value="1"></td>
+<td><input type="number" class="inpDisc" min="0" max="100" step="0.1" value="0"></td>
+<td class="tdSum">0,00 zł</td>
+<td><button class="remove-btn" onclick="removeRow('${id}')">Usuń</button></td>
+  `;
+  tbody.appendChild(tr); ['change','input'].forEach(ev=>tr.addEventListener(ev,()=>recalcRow(tr)));
+}
+
+function removeRow(id){document.getElementById(id)?.remove(); recalcGrandTotal();}
+function clearAll(){tbody.innerHTML=''; document.getElementById('grandTotal').textContent='0,00 zł'; addRow();}
+
+function recalcRow(tr){
+  const size=tr.querySelector('.selSize').value, type=tr.querySelector('.selType').value;
+  const len=parseFloat(tr.querySelector('.selLength').value)||0, qty=parseFloat(tr.querySelector('.inpQty').value)||0, disc=parseFloat(tr.querySelector('.inpDisc').value)||0;
+  const tdP=tr.querySelector('.tdPrice'), tdS=tr.querySelector('.tdSum');
+  const found=woodData.find(w=>w.size===size && w.type===type);
+  if(!found){tdP.textContent='-'; tdS.textContent='—'; tdS.dataset.value=''; recalcGrandTotal(); return;}
+  tdP.textContent=found.price.toFixed(2)+' zł';
+  let sum=found.price*len*qty*(1-disc/100); sum=Math.round(sum*100)/100;
+  tdS.textContent=sum.toFixed(2)+' zł'; tdS.dataset.value=sum; recalcGrandTotal();
+}
+
+function recalcGrandTotal(){
+  let t=0; tbody.querySelectorAll('.tdSum').forEach(td=>{if(td.dataset.value) t+=parseFloat(td.dataset.value)});
+  document.getElementById('grandTotal').textContent=t.toFixed(2)+' zł';
+}
+
+function toggleTheme(){
+  const b=document.body, c=document.getElementById('themeToggle');
+  if(c.checked){b.classList.remove('light'); b.classList.add('dark');} else{b.classList.remove('dark'); b.classList.add('light');}
+}
+
+function generateMail(){
+  const rows=[...tbody.querySelectorAll('tr')]; if(!rows.length) return;
+  let txt="Dzień dobry, poniżej przedstawiam wycenę towaru:\n\n";
+  let total=0;
+  rows.forEach(r=>{
+    const s=r.querySelector('.selSize').value, t=r.querySelector('.selType').value;
+    const p=parseFloat((r.querySelector('.tdPrice').textContent||'0').replace(',','.'));
+    const l=parseFloat(r.querySelector('.selLength').value)||0, q=parseFloat(r.querySelector('.inpQty').value)||0;
+    const d=parseFloat(r.querySelector('.inpDisc').value)||0;
+    const sum=p*l*q*(1-d/100);
+    if(!s||!t||!p) return;
+    total+=sum;
+    let classText=t==="KVH"?"C24":t==="KVHDUO"?"KVH DUO C24":"BSH Si GL24";
+    let sizeText=s.replace('x',' × ');
+    txt+=`\nŚwierk, S4S, klasa ${classText} (drewno konstrukcyjne) ${sizeText} (mm) x ${l.toFixed(2).replace('.',',')}m × ${q} szt. / ${(l*q).toFixed(2).replace('.',',')} mb × ${p.toFixed(2).replace('.',',')} zł/mb (brutto)${d>0?` -${d}%`:""} = ${sum.toFixed(2).replace('.',',')} zł (brutto)\n`;
+  });
+  txt+=`\n---\nŁączny koszt towaru: ${total.toFixed(2).replace('.',',')} zł (brutto)\n`;
+  const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  alert("Treść maila skopiowana do schowka!");
+}
+
+addRow();
+</script>
+</body>
+</html>
