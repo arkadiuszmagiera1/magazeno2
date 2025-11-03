@@ -34,7 +34,6 @@
     color: #111;
   }
 
-  /* 🔘 Przełącznik trybu jasny/ciemny */
   .theme-toggle {
     position: fixed;
     top: 16px;
@@ -175,18 +174,10 @@
     background: #f3f4f6;
   }
 
-  /* Kafelek „W przygotowaniu” */
   .tile.soon {
     opacity: 0.7;
     font-style: italic;
     cursor: not-allowed;
-  }
-  .tile.soon:hover {
-    transform: none;
-    background: var(--tile-dark);
-  }
-  body.light .tile.soon:hover {
-    background: var(--tile-light);
   }
 
   @media (max-width: 1400px) {
@@ -219,10 +210,8 @@
 </head>
 <body>
 
-<!-- 🔘 Przełącznik trybu jasny/ciemny -->
 <div class="theme-toggle" id="themeToggle" title="Zmień tryb"></div>
 
-<!-- Logowanie -->
 <div class="login-container" id="loginContainer">
   <h1>Magazeno_2</h1>
   <input type="text" id="username" placeholder="Login" autocomplete="off" />
@@ -233,26 +222,29 @@
   </div>
 </div>
 
-<!-- Menu główne -->
 <div class="menu" id="menu">
   <div class="tiles" id="tiles">
     <div class="tile" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
     <div class="tile" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
     <div class="tile" data-file="kalkulator_nro.html">Kalkulator NRO – zabezpieczenia ogniowe</div>
-    <div class="tile" data-file="kreator_tarasu_4.html">W przygotowaniu — Kreator tarasów</div>
+    <div class="tile soon" data-file="kreator_tarasu_4.html">W przygotowaniu — Kreator tarasów</div>
     <div class="tile" data-file="Wycena_KVH_BSH.html">Wycena KVH / BSH</div>
     <div class="tile" data-file="kafelek6.html">Kafelek 6</div>
     <div class="tile" data-file="kafelek7.html">Kafelek 7</div>
     <div class="tile" data-file="kafelek8.html">Kafelek 8</div>
     <div class="tile" data-file="kafelek9.html">Kafelek 9</div>
     <div class="tile" data-file="kafelek10.html">Kafelek 10</div>
+    <div class="tile" data-file="kafelek11.html">Kafelek 11</div>
+    <div class="tile" data-file="kafelek12.html">Kafelek 12</div>
+    <div class="tile" data-file="kafelek13.html">Kafelek 13</div>
+    <div class="tile" data-file="kafelek14.html">Kafelek 14</div>
+    <div class="tile" data-file="kafelek15.html">Kafelek 15</div>
   </div>
 </div>
 
 <footer>Wersja 1.3 wykonana przez #ar_mag</footer>
 
 <script>
-/* Logika logowania */
 const users = ["User1#", "User2#", "User3#", "User4#", "User5#"];
 const passwords = {
   "User1#": "1234",
@@ -319,10 +311,12 @@ tilesContainer.addEventListener("click", (e) => {
   const tile = e.target.closest(".tile");
   if (!tile) return;
   const file = tile.getAttribute("data-file");
+  if (tile.classList.contains("soon")) {
+    alert("Ten moduł jest jeszcze w przygotowaniu 😄");
+    return;
+  }
   if (file && file.trim() !== "") {
     window.location.href = file;
-  } else {
-    alert("Ten kafelek jest jeszcze pusty 😄");
   }
 });
 
@@ -333,7 +327,6 @@ passwordInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") loginButton.click();
 });
 
-/* Tryb jasny/ciemny */
 const toggle = document.getElementById("themeToggle");
 if (localStorage.getItem("theme") === "light") {
   document.body.classList.add("light");
