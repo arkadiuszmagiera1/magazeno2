@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kreator Tarasu — szkic JAF-like</title>
+<style>
+  :root{ --bg:#f5f6f6; --card:#fff; --accent:#ff7a18; --muted:#6b7280; --accent2:#2a7f4f; }
+  body{margin:0;font-family:Inter, system-ui, Arial, sans-serif;background:var(--bg);color:#111}
+  header{background:#fff;border-bottom:1px solid #e6e6e6;padding:12px 18px;display:flex;align-items:center;gap:16px}
+  header h1{font-size:18px;margin:0;color:var(--accent2)}
+  .container{max-width:1100px;margin:20px auto;padding:12px}
+  .wizard{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 8px 24px rgba(15,23,42,0.06)}
+  .tabs{display:flex;gap:8px;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:16px;overflow:auto}
+  .tab{padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer;background:transparent}
+  .tab.active{background:#fff;border:1px solid #eee;color:var(--accent);font-weight:700}
+  .content{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start}
+  .panel{background:var(--card);padding:12px;border-radius:8px;border:1px solid #f1f5f9}
+  .panel h2{margin:0 0 8px 0;color:var(--accent)}
+  .shape-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .shape-option{width:68px;height:48px;border:1px solid #eee;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#fafafa}
+  .shape-option.selected{border-color:var(--accent);box-shadow:0 2px 8px rgba(255,122,24,0.12);background:#fff}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type="number"], select{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eef8;box-sizing:border-box}
+  .small{font-size:13px;color:var(--muted)}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+  button.primary{background:var(--accent);color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid #eee;padding:8px 10px;border-radius:8px;cursor:pointer}
+  canvas{background:#fff;border:1px solid #e6eef8;border-radius:6px;display:block;margin:8px auto}
+  .summary{font-size:15px}
+  .summary-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #f1f5f9}
+  .right-rail{position:sticky;top:20px}
+  .kpi{display:flex;flex-direction:column;gap:6px}
+  .kpi .item{background:#fbfbfb;padding:8px;border-radius:8px;border:1px solid #f1f5f9}
+  .grid-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media (max-width:980px){ .content{grid-template-columns:1fr} .right-rail{position:static} .tabs{overflow:auto} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Kreator Tarasu — prototyp</h1>
+  <div class="small">Interaktywny kreator (szkielet).</div>
+</header>
+
+<div class="container">
+  <div class="wizard">
+    <!-- Tabs -->
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-step="shape">Kształt tarasu</div>
+      <div class="tab" data-step="material">Materiał</div>
+      <div class="tab" data-step="structure">Struktura i legary</div>
+      <div class="tab" data-step="product">Produkt</div>
+      <div class="tab" data-step="pattern">Wzór montażu</div>
+      <div class="tab" data-step="summary">Podsumowanie</div>
+    </div>
+
+    <div class="content">
+      <!-- LEFT: main area -->
+      <div>
+        <!-- STEP: SHAPE -->
+        <div class="panel step" id="step-shape">
+          <h2>Kształt tarasu</h2>
+          <p class="small">Wybierz kształt i wpisz wymiary (cm). Możesz obrócić układ desek o 90°.</p>
+
+          <div class="shape-grid" id="shapeGrid">
+            <div class="shape-option selected" data-shape="rectangle" title="Prosty">▢</div>
+            <div class="shape-option" data-shape="l" title="L">L</div>
+            <div class="shape-option" data-shape="t" title="T">T</div>
+            <div class="shape-option" data-shape="c" title="C">C</div>
+            <div class="shape-option" data-shape="around" title="Wokół basenu">◯</div>
+          </div>
+
+          <div id="shapeInputs">
+            <!-- dynamic inputs inserted here -->
+          </div>
+
+          <div class="controls">
+            <button class="ghost" id="rotateBtn">Obróć o 90°</button>
+            <div style="flex:1"></div>
+            <button class="primary" id="confirmShape">Zatwierdź</button>
+          </div>
+
+          <canvas id="canvasShape" width="600" height="420"></canvas>
+        </div>
+
+        <!-- STEP: MATERIAL -->
+        <div class="panel step" id="step-material" style="display:none">
+          <h2>Materiał</h2>
+          <p class="small">Wybierz typ deski (placeholdery).</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <div class="panel" style="flex:1;min-width:160px;cursor:pointer" data-mat="wood">Deski profilowane lite<div class="small">Drewno</div></div>
+            <div class="panel" style="flex:1;min-width:160px;cursor:pointer" data-mat="thermo">Deski termowane<div class="small">Drewno termowane</div></div>
+            <div class="panel" style="flex:1;min-width:160px;cursor:pointer" data-mat="comp_hollow">Kompozyt komorowy<div class="small">Kompozyt</div></div>
+            <div class="panel" style="flex:1;min-width:160px;cursor:pointer" data-mat="comp_solid">Kompozyt pełny<div class="small">Kompozyt</div></div>
+          </div>
+          <div class="controls" style="margin-top:12px">
+            <button class="ghost" id="backFromMaterial">Wstecz</button>
+            <div style="flex:1"></div>
+            <button class="primary" id="confirmMaterial">Dalej</button>
+          </div>
+        </div>
+
+        <!-- STEP: STRUCTURE -->
+        <div class="panel step" id="step-structure" style="display:none">
+          <h2>Struktura i legary</h2>
+          <p class="small">Wybierz montaż i podaj rozstaw legarów.</p>
+
+          <div class="grid-cols">
+            <div>
+              <label>Montaż</label>
+              <select id="mountType">
+                <option value="screws">Na wkręty</option>
+                <option value="hidden">Ukryty montaż</option>
+                <option value="none">Brak legarów</option>
+              </select>
+            </div>
+            <div>
+              <label>Rozstaw legarów (cm)</label>
+              <input type="number" id="joistSpacing" value="40" min="20" step="1">
+            </div>
+          </div>
+
+          <div style="margin-top:10px" class="small">Określ nachylenie podłoża i rodzaj podłoża</div>
+          <div class="grid-cols" style="margin-top:8px">
+            <div>
+              <label>Nachylenie (°)</label>
+              <input type="number" id="slope" value="0" min="0" step="0.1">
+            </div>
+            <div>
+              <label>Rodzaj podłoża</label>
+              <select id="baseType">
+                <option value="concrete">Beton</option>
+                <option value="soil">Grunt</option>
+                <option value="paving">Kostka</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="controls">
+            <button class="ghost" id="backFromStructure">Wstecz</button>
+            <div style="flex:1"></div>
+            <button class="primary" id="confirmStructure">Dalej</button>
+          </div>
+        </div>
+
+        <!-- STEP: PRODUCT -->
+        <div class="panel step" id="step-product" style="display:none">
+          <h2>Produkt</h2>
+          <p class="small">Wybierz profil deski oraz standardowe długości.</p>
+          <label>Profil deski</label>
+          <select id="profileSelect">
+            <option value="120">Deska 120 mm</option>
+            <option value="140">Deska 140 mm</option>
+            <option value="90">Deska 90 mm</option>
+          </select>
+          <label style="margin-top:8px">Dostępne długości (m)</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <label><input type="checkbox" class="lengthChk" value="2.0" checked>2.0</label>
+            <label><input type="checkbox" class="lengthChk" value="2.5" checked>2.5</label>
+            <label><input type="checkbox" class="lengthChk" value="3.0" checked>3.0</label>
+            <label><input type="checkbox" class="lengthChk" value="4.0">4.0</label>
+          </div>
+
+          <div class="controls">
+            <button class="ghost" id="backFromProduct">Wstecz</button>
+            <div style="flex:1"></div>
+            <button class="primary" id="confirmProduct">Dalej</button>
+          </div>
+        </div>
+
+        <!-- STEP: PATTERN -->
+        <div class="panel step" id="step-pattern" style="display:none">
+          <h2>Wzór montażu</h2>
+          <p class="small">Wybierz kierunek i wariant montażu (wpływa na zapas).</p>
+
+          <div style="margin-top:8px">
+            <label>Kierunek układania desek</label>
+            <select id="boardsDirection">
+              <option value="along-length">Wzdłuż długości</option>
+              <option value="along-width">Wzdłuż szerokości</option>
+            </select>
+          </div>
+
+          <div style="margin-top:8px">
+            <label>Wzór</label>
+            <select id="patternSelect">
+              <option value="straight">Prosto</option>
+              <option value="staggered">Przesunięcie</option>
+              <option value="herringbone">Jodełka (więcej strat)</option>
+            </select>
+          </div>
+
+          <div class="controls">
+            <button class="ghost" id="backFromPattern">Wstecz</button>
+            <div style="flex:1"></div>
+            <button class="primary" id="confirmPattern">Dalej</button>
+          </div>
+        </div>
+
+        <!-- STEP: SUMMARY -->
+        <div class="panel step" id="step-summary" style="display:none">
+          <h2>Podsumowanie</h2>
+          <p class="small">Rysunek, lista materiałów i orientacyjna wycena. Pamiętaj — obliczenia szacunkowe.</p>
+
+          <canvas id="canvasSummary" width="600" height="420"></canvas>
+
+          <div style="margin-top:8px" id="summaryDetails">
+            <!-- summary populated by JS -->
+          </div>
+
+          <div class="controls" style="margin-top:10px">
+            <button class="ghost" id="backFromSummary">Wstecz</button>
+            <div style="flex:1"></div>
+            <button class="primary" id="saveProjectBtn">Zapisz projekt (local)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: rail -->
+      <aside class="right-rail">
+        <div class="panel">
+          <h3>Plan i szybkie dane</h3>
+          <div class="kpi">
+            <div class="item small"><strong>Powierzchnia:</strong> <div id="kpi-area">- m²</div></div>
+            <div class="item small"><strong>Obwód:</strong> <div id="kpi-perim">- mb</div></div>
+            <div class="item small"><strong>Liczba desek (szt):</strong> <div id="kpi-boards">-</div></div>
+            <div class="item small"><strong>Liczba legarów:</strong> <div id="kpi-joists">-</div></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <h3>Ustawienia cen (zmień jeśli chcesz)</h3>
+          <label>Cena deski (zł / m)</label>
+          <input type="number" id="priceBoardMb" value="120">
+          <label style="margin-top:8px">Cena legara (zł / mb)</label>
+          <input type="number" id="priceJoistMb" value="40">
+          <label style="margin-top:8px">Cena śrub (100szt)</label>
+          <input type="number" id="priceScrews100" value="30">
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- State ---------- */
+const state = {
+  step: 'shape',
+  shape: 'rectangle',
+  rotate: 0, // 0 or 90
+  dims: { A:300, B:300, C:300, D:300, E:0, F:0 }, // cm defaults
+  material: 'wood',
+  mountType: 'screws',
+  joistSpacing: 40,
+  slope:0, baseType:'concrete',
+  profileWidth_mm:120,
+  boardLengths:[2.0,2.5,3.0],
+  boardsDirection:'along-length',
+  pattern:'straight'
+};
+
+/* ---------- DOM refs ---------- */
+const tabs = document.querySelectorAll('.tab');
+const steps = document.querySelectorAll('.step');
+const shapeGrid = document.getElementById('shapeGrid');
+const shapeInputs = document.getElementById('shapeInputs');
+const canvasShape = document.getElementById('canvasShape');
+const ctxS = canvasShape.getContext('2d');
+const canvasSummary = document.getElementById('canvasSummary');
+const ctxSUM = canvasSummary.getContext('2d');
+
+/* KPI refs */
+const kpiArea = document.getElementById('kpi-area');
+const kpiPerim = document.getElementById('kpi-perim');
+const kpiBoards = document.getElementById('kpi-boards');
+const kpiJoists = document.getElementById('kpi-joists');
+
+/* Price inputs */
+const priceBoardMb = document.getElementById('priceBoardMb');
+const priceJoistMb = document.getElementById('priceJoistMb');
+const priceScrews100 = document.getElementById('priceScrews100');
+
+/* ---------- Helpers ---------- */
+function setActiveStep(name){
+  state.step = name;
+  tabs.forEach(t=> t.classList.toggle('active', t.dataset.step===name));
+  steps.forEach(s=> s.style.display = s.id === 'step-' + name ? '' : 'none');
+  // draw preview when entering shape/summary
+  if(name === 'shape') drawShapeCanvas();
+  if(name === 'summary') renderSummary();
+}
+
+/* Tabs click */
+tabs.forEach(t => t.addEventListener('click', ()=> setActiveStep(t.dataset.step)));
+
+/* ---------- Shape selection & inputs ---------- */
+shapeGrid.querySelectorAll('.shape-option').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    shapeGrid.querySelectorAll('.shape-option').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
+    state.shape = el.dataset.shape;
+    buildShapeInputs();
+    drawShapeCanvas();
+  });
+});
+
+/* Build dynamic inputs depending on shape */
+function buildShapeInputs(){
+  const s = state.shape;
+  shapeInputs.innerHTML = '';
+  const wrapper = document.createElement('div');
+  wrapper.style.display='grid';
+  wrapper.style.gridTemplateColumns='repeat(auto-fit,minmax(120px,1fr))';
+  wrapper.style.gap='8px';
+  // define for common shapes:
+  if(s === 'rectangle'){
+    wrapper.innerHTML = `
+      <div><label>A (cm)</label><input type="number" id="inA" value="${state.dims.A}"></div>
+      <div><label>B (cm)</label><input type="number" id="inB" value="${state.dims.B}"></div>
+    `;
+  } else if(s === 'l'){
+    wrapper.innerHTML = `
+      <div><label>A (cm)</label><input type="number" id="inA" value="${state.dims.A || 300}"></div>
+      <div><label>B (cm)</label><input type="number" id="inB" value="${state.dims.B || 200}"></div>
+      <div><label>C (cm)</label><input type="number" id="inC" value="${state.dims.C || 150}"></div>
+      <div><label>D (cm)</label><input type="number" id="inD" value="${state.dims.D || 150}"></div>
+    `;
+  } else if(s === 't'){
+    wrapper.innerHTML = `
+      <div><label>A (cm)</label><input type="number" id="inA" value="${state.dims.A || 150}"></div>
+      <div><label>B (cm)</label><input type="number" id="inB" value="${state.dims.B || 300}"></div>
+      <div><label>C (cm)</label><input type="number" id="inC" value="${state.dims.C || 150}"></div>
+      <div><label>D (cm)</label><input type="number" id="inD" value="${state.dims.D || 150}"></div>
+      <div><label>E (cm)</label><input type="number" id="inE" value="${state.dims.E || 0}"></div>
+      <div><label>F (cm)</label><input type="number" id="inF" value="${state.dims.F || 0}"></div>
+    `;
+  } else if(s === 'c'){
+    wrapper.innerHTML = `
+      <div><label>A (cm)</label><input type="number" id="inA" value="${state.dims.A || 400}"></div>
+      <div><label>B (cm)</label><input type="number" id="inB" value="${state.dims.B || 200}"></div>
+      <div><label>C (cm)</label><input type="number" id="inC" value="${state.dims.C || 200}"></div>
+      <div><label>D (cm)</label><input type="number" id="inD" value="${state.dims.D || 200}"></div>
+      <div><label>E (cm)</label><input type="number" id="inE" value="${state.dims.E || 0}"></div>
+    `;
+  } else { // around / other simple
+    wrapper.innerHTML = `<div><label>średnica / szerokość (cm)</label><input type="number" id="inA" value="${state.dims.A || 300}"></div>`;
+  }
+
+  shapeInputs.appendChild(wrapper);
+
+  // add listeners
+  wrapper.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      // sync state
+      const id = inp.id;
+      if(id==='inA') state.dims.A = Number(inp.value);
+      if(id==='inB') state.dims.B = Number(inp.value);
+      if(id==='inC') state.dims.C = Number(inp.value);
+      if(id==='inD') state.dims.D = Number(inp.value);
+      if(id==='inE') state.dims.E = Number(inp.value);
+      if(id==='inF') state.dims.F = Number(inp.value);
+      drawShapeCanvas();
+    });
+  });
+}
+
+/* initial */
+buildShapeInputs();
+
+/* Rotate */
+document.getElementById('rotateBtn').addEventListener('click', ()=>{
+  state.rotate = (state.rotate + 90) % 180;
+  drawShapeCanvas();
+});
+
+/* Confirm shape -> go next */
+document.getElementById('confirmShape').addEventListener('click', ()=>{
+  setActiveStep('material');
+});
+
+/* Material selection */
+document.querySelectorAll('#step-material [data-mat]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('#step-material [data-mat]').forEach(x=>x.style.boxShadow='');
+    el.style.boxShadow='0 6px 18px rgba(0,0,0,0.06)';
+    state.material = el.dataset.mat;
+  });
+});
+document.getElementById('backFromMaterial').addEventListener('click', ()=> setActiveStep('shape'));
+document.getElementById('confirmMaterial').addEventListener('click', ()=> setActiveStep('structure'));
+
+/* Structure step */
+document.getElementById('backFromStructure').addEventListener('click', ()=> setActiveStep('material'));
+document.getElementById('confirmStructure').addEventListener('click', ()=>{
+  state.mountType = document.getElementById('mountType').value;
+  state.joistSpacing = Number(document.getElementById('joistSpacing').value);
+  state.slope = Number(document.getElementById('slope').value);
+  state.baseType = document.getElementById('baseType').value;
+  setActiveStep('product');
+});
+
+/* Product */
+document.getElementById('backFromProduct').addEventListener('click', ()=> setActiveStep('structure'));
+document.getElementById('confirmProduct').addEventListener('click', ()=>{
+  state.profileWidth_mm = Number(document.getElementById('profileSelect').value);
+  state.boardLengths = Array.from(document.querySelectorAll('.lengthChk:checked')).map(x=>Number(x.value));
+  setActiveStep('pattern');
+});
+
+/* Pattern */
+document.getElementById('backFromPattern').addEventListener('click', ()=> setActiveStep('product'));
+document.getElementById('confirmPattern').addEventListener('click', ()=>{
+  state.boardsDirection = document.getElementById('boardsDirection').value;
+  state.pattern = document.getElementById('patternSelect').value;
+  setActiveStep('summary');
+});
+
+/* Summary back */
+document.getElementById('backFromSummary').addEventListener('click', ()=> setActiveStep('pattern'));
+
+/* Save project */
+document.getElementById('saveProjectBtn').addEventListener('click', ()=>{
+  const payload = {state, summary: currentSummary};
+  const db = JSON.parse(localStorage.getItem('kreator_projects')||'[]');
+  db.push({id:Date.now(), payload});
+  localStorage.setItem('kreator_projects', JSON.stringify(db));
+  alert('Projekt zapisany lokalnie (localStorage).');
+});
+
+/* ---------- Drawing functions ---------- */
+
+/* Compute polygon or rectangles for shape, and area/perimeter */
+function computeGeometry(){
+  const s = state.shape;
+  // return {areas: m2, perimeter: mb, layout: array of rects for drawing}
+  // Simplify: for rectangle use A x B; for L/T/C we'll define composed rectangles.
+  let area_m2=0, perim_mb=0, layout=[];
+  if(s==='rectangle'){
+    const A = (state.dims.A||300)/100;
+    const B = (state.dims.B||300)/100;
+    area_m2 = A * B;
+    perim_mb = 2*(A+B);
+    layout.push({x:0,y:0,w:B,h:A}); // w - horizontal axis = length (B), h vertical = width (A)
+  } else if(s==='l'){
+    // construct 2 rects: left and top-right
+    const A = (state.dims.A||300)/100;
+    const B = (state.dims.B||200)/100;
+    const C = (state.dims.C||150)/100;
+    const D = (state.dims.D||150)/100;
+    // layout: main rect width B height A, plus extension C x D at top-right
+    area_m2 = (A*B) + (C*D);
+    // approximate perimeter: compute polygon perimeter simple bounding polygon (rough)
+    perim_mb = 2*(A+B) + 2*(C+D) - Math.min(A,C); // rough
+    layout.push({x:0,y:0,w:B,h:A});
+    layout.push({x:B-C,y:-D,w:C,h:D});
+  } else if(s==='t'){
+    // center stem plus base
+    const A=(state.dims.A||150)/100, B=(state.dims.B||300)/100, C=(state.dims.C||150)/100, D=(state.dims.D||150)/100;
+    const E=(state.dims.E||0)/100, F=(state.dims.F||0)/100;
+    // For simplicity: central tall rectangle (B x A), left and right arms (C x D)
+    area_m2 = (A*B) + (C*D)*2;
+    perim_mb = 2*(A+B) + 2*(C+D)*2; // rough
+    layout.push({x:0,y:0,w:B,h:A});
+    layout.push({x:-C,y:A,w:C,h:D});
+    layout.push({x:B,y:A,w:C,h:D});
+  } else if(s==='c'){
+    const A=(state.dims.A||400)/100, B=(state.dims.B||200)/100, C=(state.dims.C||200)/100, D=(state.dims.D||200)/100;
+    // outer rect A x B minus inner C x D at center
+    area_m2 = Math.max(0, (A*B) - (C*D));
+    perim_mb = 2*(A+B) + 2*(C+D); // rough
+    layout.push({x:0,y:0,w:A,h:B});
+    layout.push({x:(A-C)/2,y:(B-D)/2,w:C,h:D, cut:true});
+  } else { // around/pool
+    const A=(state.dims.A||300)/100;
+    area_m2 = Math.PI * (A/2)*(A/2);
+    perim_mb = 2*Math.PI*(A/2);
+    layout.push({circle:true, cx:0, cy:0, r:A/2});
+  }
+  return {area_m2: Math.round(area_m2*100)/100, perim_mb: Math.round(perim_mb*100)/100, layout};
+}
+
+/* Draw shape and board lines in canvasShape */
+function drawShapeCanvas(){
+  // clear
+  ctxS.clearRect(0,0,canvasShape.width, canvasShape.height);
+  // compute geometry
+  const geom = computeGeometry();
+  // scale to canvas
+  const padding = 40;
+  // compute bounding box from layout rects
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  geom.layout.forEach(p=>{
+    if(p.circle){ minX=Math.min(minX,-p.r); maxX=Math.max(maxX,p.r); minY=Math.min(minY,-p.r); maxY=Math.max(maxY,p.r); return; }
+    const x1 = p.x, y1 = p.y, x2 = p.x + p.w, y2 = p.y + p.h;
+    minX=Math.min(minX,x1); minY=Math.min(minY,y1); maxX=Math.max(maxX,x2); maxY=Math.max(maxY,y2);
+  });
+  if(!isFinite(minX)){ minX=0; minY=0; maxX=1; maxY=1 }
+  const geomW = maxX - minX, geomH = maxY - minY;
+  const scale = Math.min((canvasShape.width-2*padding)/ (geomW||1), (canvasShape.height-2*padding)/(geomH||1));
+  const offsetX = padding - minX*scale, offsetY = padding - minY*scale;
+
+  // background
+  ctxS.fillStyle = '#ffffff';
+  ctxS.fillRect(0,0,canvasShape.width,canvasShape.height);
+
+  // draw shapes
+  ctxS.strokeStyle = '#333';
+  ctxS.lineWidth = 1.5;
+  ctxS.fillStyle = '#fdf6ec';
+
+  geom.layout.forEach(p=>{
+    if(p.circle){
+      ctxS.beginPath();
+      ctxS.arc(offsetX + p.cx*scale, offsetY + p.cy*scale, p.r*scale, 0, Math.PI*2);
+      ctxS.fill(); ctxS.stroke();
+      return;
+    }
+    if(p.cut){
+      // outer rect then inner cut
+      ctxS.beginPath();
+      ctxS.rect(offsetX + p.x*scale, offsetY + p.y*scale, p.w*scale, p.h*scale);
+      ctxS.fill(); ctxS.stroke();
+    } else {
+      ctxS.beginPath();
+      ctxS.rect(offsetX + p.x*scale, offsetY + p.y*scale, p.w*scale, p.h*scale);
+      ctxS.fill(); ctxS.stroke();
+    }
+  });
+
+  // draw board lines: we will draw lines in direction depending on state.boardsDirection and state.profileWidth_mm
+  const profile_m = (state.profileWidth_mm||120)/1000; // m
+  // board lines spacing in px:
+  // find extent in direction perpendicular to boards
+  let perpExtent_px;
+  if(state.boardsDirection === 'along-length'){
+    // boards run along X (horizontal), so we need vertical lines across width (geomH)
+    perpExtent_px = geomH*scale;
+    // start position along minX..maxX
+    const start = minX, end = maxX;
+    // number of boards = width / profile_m approximate
+    const width_m = geomH; // NOTE: approximate
+    const nboards = Math.ceil(width_m / profile_m);
+    // draw vertical parallel lines across shape bounding box
+    ctxS.save();
+    ctxS.strokeStyle = '#b08a4b';
+    ctxS.lineWidth = 2;
+    for(let i=0;i<=nboards;i++){
+      const t = i/nboards;
+      const x = offsetX + minX*scale + t*(geomW*scale);
+      // clip to shape by drawing lines and later clipping optional - simplify: draw full line
+      ctxS.beginPath();
+      ctxS.moveTo(x, offsetY + minY*scale);
+      ctxS.lineTo(x, offsetY + maxY*scale);
+      ctxS.stroke();
+    }
+    ctxS.restore();
+  } else {
+    // along-width: boards run vertical, so draw horizontal lines
+    const width_m = geomW;
+    const nboards = Math.ceil(width_m / profile_m);
+    ctxS.save();
+    ctxS.strokeStyle = '#b08a4b';
+    ctxS.lineWidth = 2;
+    for(let i=0;i<=nboards;i++){
+      const t = i/nboards;
+      const y = offsetY + minY*scale + t*(geomH*scale);
+      ctxS.beginPath();
+      ctxS.moveTo(offsetX + minX*scale, y);
+      ctxS.lineTo(offsetX + maxX*scale, y);
+      ctxS.stroke();
+    }
+    ctxS.restore();
+  }
+
+  // KPI update
+  updateKPIs(geom);
+}
+
+/* ---------- KPI and calculation ---------- */
+let currentSummary = null;
+function updateKPIs(geom){
+  kpiArea.textContent = (geom.area_m2 || 0) + ' m²';
+  kpiPerim.textContent = (geom.perim_mb || 0) + ' mb';
+  // rough boards count: area / (width*1m length)
+  const boardWidth_m = (state.profileWidth_mm||120)/1000;
+  const boardsCount = Math.ceil((geom.area_m2 || 0) / (boardWidth_m * 1.0));
+  kpiBoards.textContent = boardsCount + ' szt (orient.)';
+  // joists: assume spaced every joistSpacing cm across smaller dimension
+  const joistSpacing_m = (state.joistSpacing||40)/100;
+  // approximate number of joists: width / spacing
+  // use smaller side of bounding box:
+  const shorter = Math.min((state.dims.A||300)/100, (state.dims.B||300)/100);
+  const joistsCount = Math.ceil(shorter / joistSpacing_m) + 1;
+  kpiJoists.textContent = joistsCount + ' szt';
+  // keep currentSummary baseline
+  currentSummary = {
+    geom, boardsCount, joistsCount
+  };
+}
+
+/* ---------- Summary rendering & costing ---------- */
+function renderSummary(){
+  // draw same shape with more details
+  // clear
+  ctxSUM.clearRect(0,0,canvasSummary.width,canvasSummary.height);
+  // reuse draw logic but simpler: call computeGeometry and draw lines
+  drawShapeCanvasToContext(ctxSUM, canvasSummary);
+  // compute costs
+  const geom = computeGeometry();
+  const area = geom.area_m2 || 0;
+  const priceBoard = Number(priceBoardMb.value) || 120; // per mb of board (rough)
+  const priceJoist = Number(priceJoistMb.value) || 40;
+  const priceScrews = Number(priceScrews100.value) || 30;
+
+  // boards mb: approximate area / (width in m)
+  const boardWidth_m = (state.profileWidth_mm||120)/1000;
+  const linear_m = area / boardWidth_m;
+  // waste estimate based on pattern
+  let waste = 5;
+  if(state.pattern==='staggered') waste += 5;
+  if(state.pattern==='herringbone') waste += 12;
+  const linear_with_waste = linear_m * (1 + waste/100);
+  // number of standard lengths chosen — use longest available
+  const longest = Math.max(...(state.boardLengths.length?state.boardLengths:[3.0]));
+  const pieces = Math.ceil(linear_with_waste / longest);
+  const boards_mb_total = pieces * longest;
+
+  // joists cost
+  // approximate joist total length = joistsCount * longest_dimension_mb
+  const longest_dim = Math.max((state.dims.A||300)/100, (state.dims.B||300)/100);
+  const joists_total_mb = (currentSummary?.joistsCount || 0) * longest_dim;
+  const costBoards = boards_mb_total * priceBoard;
+  const costJoists = joists_total_mb * priceJoist;
+  const screwsPacks = Math.ceil((boards_mb_total * 30) / 100); // 30 screws per mb
+  const costScrews = screwsPacks * priceScrews;
+  const total = Math.round((costBoards + costJoists + costScrews) * 100) / 100;
+
+  const summaryHTML = `
+    <div class="summary">
+      <div class="summary-row"><div>Powierzchnia</div><div><strong>${area} m²</strong></div></div>
+      <div class="summary-row"><div>Obwód</div><div><strong>${geom.perim_mb} mb</strong></div></div>
+      <div class="summary-row"><div>Mb desek (z zapasem ${waste}%)</div><div><strong>${Math.round(boards_mb_total*100)/100} mb</strong></div></div>
+      <div class="summary-row"><div>Liczba sztuk desek (ok.)</div><div><strong>${pieces} szt</strong></div></div>
+      <div class="summary-row"><div>Legary — łączna długość</div><div><strong>${Math.round(joists_total_mb*100)/100} mb</strong></div></div>
+      <div class="summary-row"><div>Koszt desek</div><div><strong>${costBoards.toFixed(2)} zł</strong></div></div>
+      <div class="summary-row"><div>Koszt legarów</div><div><strong>${costJoists.toFixed(2)} zł</strong></div></div>
+      <div class="summary-row"><div>Koszt śrub</div><div><strong>${costScrews.toFixed(2)} zł</strong></div></div>
+      <div style="padding-top:10px;font-size:16px"><strong>Orientacyjny koszt całkowity: ${total.toFixed(2)} zł</strong></div>
+    </div>
+  `;
+  document.getElementById('summaryDetails').innerHTML = summaryHTML;
+}
+
+/* Helper to draw shape to a provided context (for summary) */
+function drawShapeCanvasToContext(ctx, canvas){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const geom = computeGeometry();
+  const padding = 30;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  geom.layout.forEach(p=>{
+    if(p.circle){ minX=Math.min(minX,-p.r); maxX=Math.max(maxX,p.r); minY=Math.min(minY,-p.r); maxY=Math.max(maxY,p.r); return; }
+    const x1=p.x, y1=p.y, x2=p.x+p.w, y2=p.y+p.h;
+    minX=Math.min(minX,x1); minY=Math.min(minY,y1); maxX=Math.max(maxX,x2); maxY=Math.max(maxY,y2);
+  });
+  if(!isFinite(minX)){ minX=0;minY=0;maxX=1;maxY=1 }
+  const geomW = maxX-minX, geomH = maxY-minY;
+  const scale = Math.min((canvas.width-2*padding)/(geomW||1),(canvas.height-2*padding)/(geomH||1));
+  const offsetX = padding - minX*scale, offsetY = padding - minY*scale;
+
+  // draw base shapes
+  ctx.fillStyle='#fff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle='#333'; ctx.lineWidth=1.2;
+  ctx.fillStyle='#f8f4e8';
+  geom.layout.forEach(p=>{
+    if(p.circle){ ctx.beginPath(); ctx.arc(offsetX+p.cx*scale, offsetY+p.cy*scale, p.r*scale,0,Math.PI*2); ctx.fill(); ctx.stroke(); return; }
+    ctx.beginPath(); ctx.rect(offsetX+p.x*scale, offsetY+p.y*scale, p.w*scale, p.h*scale); ctx.fill(); ctx.stroke();
+  });
+
+  // draw board lines simplified
+  ctx.save();
+  ctx.strokeStyle='#b08a4b'; ctx.lineWidth=1.6;
+  const boardWidth_m = (state.profileWidth_mm||120)/1000;
+  if(state.boardsDirection==='along-length'){
+    // vertical lines
+    const width_m = geomW;
+    const n = Math.ceil(width_m / boardWidth_m);
+    for(let i=0;i<=n;i++){
+      const x = offsetX + (i/n) * (geomW*scale);
+      ctx.beginPath(); ctx.moveTo(x, offsetY); ctx.lineTo(x, offsetY + geomH*scale); ctx.stroke();
+    }
+  } else {
+    const n = Math.ceil(geomW / boardWidth_m);
+    for(let i=0;i<=n;i++){
+      const y = offsetY + (i/n) * (geomH*scale);
+      ctx.beginPath(); ctx.moveTo(offsetX, y); ctx.lineTo(offsetX + geomW*scale, y); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/* ---------- initial draws ---------- */
+drawShapeCanvas();
+
+/* Re-draw when price inputs change for summary dynamic update if open */
+[priceBoardMb, priceJoistMb, priceScrews100].forEach(el=>el.addEventListener('input', ()=>{
+  if(state.step==='summary') renderSummary();
+}));
+
+/* End of script */
+</script>
+</body>
+</html>
