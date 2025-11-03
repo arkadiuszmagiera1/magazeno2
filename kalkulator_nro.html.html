@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator do zabezpieczania wyrobów z drewna przed działaniem ognia (NRO)</title>
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f8f9fa;
+  color: #222;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  color: #222;
+  margin-bottom: 20px;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin-bottom: 20px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: 10px;
+}
+th, td {
+  text-align: center;
+  padding: 12px;
+}
+th {
+  background: #4caf50;
+  color: white;
+  font-size: 1rem;
+}
+tr:nth-child(even) {
+  background: #f1f3f5;
+}
+input[type="number"], select {
+  width: 90%;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+/* DOPASOWANA KOLORYSTYKA NAGŁÓWKÓW */
+.section-title {
+  background: linear-gradient(145deg, #4caf50, #222);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px;
+  font-size: 1.3rem;
+  border-radius: 10px;
+  margin: 25px 0 12px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  transition: all 0.3s ease;
+}
+.section-title:hover {
+  background: linear-gradient(145deg, #43a047, #111);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+/* Styl sekcji Całość brutto */
+.total {
+  background: linear-gradient(145deg, #4caf50, #222);
+  color: white;
+  font-weight: bold;
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  transition: all 0.3s ease;
+}
+.total:hover {
+  background: linear-gradient(145deg, #43a047, #111);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+input[type="radio"] {
+  margin-right: 8px;
+}
+label {
+  cursor: pointer;
+}
+button {
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px 0;
+  border: none;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+button:hover {
+  background-color: #388e3c;
+}
+.signature {
+  position: fixed;
+  bottom: 10px;
+  right: 15px;
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+#contact-form h2 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: #222;
+}
+#contact-form form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#contact-form input, #contact-form button {
+  margin: 5px 0;
+  width: 80%;
+  max-width: 400px;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+</style>
+</head>
+<body>
+
+<h1>Kalkulator do zabezpieczania wyrobów z drewna przed działaniem ognia (NRO)</h1>
+
+<table>
+<tr><th>Powierzchnia [m²]</th><th>Zużycie Un-50% [g/m²]</th><th>Dorken Holzlasur 5.10 [kg]</th><th>Holzlasur wydajność [m²/L]</th></tr>
+<tr>
+<td><input type="number" id="powierzchnia" placeholder="np. 200" min="1"></td>
+<td>460</td>
+<td>22,5</td>
+<td>6</td>
+</tr>
+</table>
+
+<table>
+<tr><th colspan="2">Zastosowanie</th></tr>
+<tr>
+<td><label><input type="radio" name="rodzaj" value="wewnatrz"> Wewnątrz (Uniepalniacz + Lazura)</label></td>
+<td><label><input type="radio" name="rodzaj" value="zewnatrz"> Na zewnątrz (Uniepalniacz + Kuprafung-D + Lazura)</label></td>
+</tr>
+</table>
+
+<div class="section-title">Dorken Holzlasur 5.10</div>
+<label for="kolor">Wybierz kolor Holzlasur:</label>
+<select id="kolor">
+<option value="">-- wybierz kolor --</option>
+<option value="Bezbarwny">Bezbarwny</option>
+<option value="2360 Klonowy">2360 Klonowy</option>
+<option value="2370 Jawor">2370 Jawor</option>
+<option value="6570 Jasny Dąb">6570 Jasny Dąb</option>
+<option value="2335 Sosna">2335 Sosna</option>
+<option value="8220 Afromosia">8220 Afromosia</option>
+<option value="8260 Antyczny Dąb">8260 Antyczny Dąb</option>
+<option value="8170 Orzech włoski">8170 Orzech włoski</option>
+<option value="8320 Teak">8320 Teak</option>
+<option value="2380 Modrzew">2380 Modrzew</option>
+<option value="8270 Drzewo orzechowe">8270 Drzewo orzechowe</option>
+<option value="8285 Mahoń">8285 Mahoń</option>
+<option value="8450 Palisander">8450 Palisander</option>
+<option value="5449 Błękitny">5449 Błękitny</option>
+<option value="8402 Mango">8402 Mango</option>
+<option value="8403 Melon">8403 Melon</option>
+<option value="3180 Szwedzka czerwień">3180 Szwedzka czerwień</option>
+<option value="8410 Pistacja">8410 Pistacja</option>
+<option value="6486 Jodłowa zieleń">6486 Jodłowa zieleń</option>
+<option value="1105 Biały">1105 Biały</option>
+<option value="9995 Heban">9995 Heban</option>
+</select>
+
+<table>
+<tr><th>Pojemność</th><th>Ilość</th><th>Cena brutto</th></tr>
+<tr><td>20 L</td><td id="holz20_qty">–</td><td id="holz20_price">–</td></tr>
+<tr><td>2,5 L</td><td id="holz2_qty">–</td><td id="holz2_price">–</td></tr>
+</table>
+
+<div class="section-title">Uniepalniacz</div>
+<table>
+<tr><th>Pojemność</th><th>Ilość</th><th>Cena brutto</th></tr>
+<tr><td>12,5 kg</td><td id="uni125_qty">–</td><td id="uni125_price">–</td></tr>
+<tr><td>6 kg</td><td id="uni6_qty">–</td><td id="uni6_price">–</td></tr>
+</table>
+
+<div class="section-title">Kuprafung-D-Compact</div>
+<table>
+<tr><th>Pojemność</th><th>Ilość</th><th>Cena brutto</th></tr>
+<tr><td>5 kg</td><td id="kup5_qty">–</td><td id="kup5_price">–</td></tr>
+<tr><td>1 kg</td><td id="kup1_qty">–</td><td id="kup1_price">–</td></tr>
+</table>
+
+<table>
+<tr><th>Suma brutto:</th><th>Holzlasur</th><th>Uniepalniacz</th><th>Kuprafung</th></tr>
+<tr><td>Wartość [zł]</td><td id="sum_holz">–</td><td id="sum_uni">–</td><td id="sum_kup">–</td></tr>
+</table>
+
+<div class="total" id="total_brutto">Całość brutto: –</div>
+
+<div id="contact-form">
+  <h2>Zainteresowany? Wypełnij poniższy formularz — skontaktujemy się jak najszybciej.</h2>
+  <form action="send_mail.php" method="POST" id="formContact">
+    <input type="text" name="name" placeholder="Imię" required>
+    <input type="text" name="phone" placeholder="Numer telefonu" required>
+    <input type="email" name="email" placeholder="Adres e-mail" required>
+    <button type="submit">Wyślij</button>
+  </form>
+</div>
+
+<div class="signature">#ar_mag</div>
+
+<script>
+const cenyHolzlasur = {
+"Bezbarwny":{"20L":963.20,"2.5L":151.50},
+"2360 Klonowy":{"20L":1160.00,"2.5L":176.10},
+"2370 Jawor":{"20L":992.70,"2.5L":155.20},
+"6570 Jasny Dąb":{"20L":1160.00,"2.5L":176.10},
+"2335 Sosna":{"20L":1160.00,"2.5L":176.10},
+"8220 Afromosia":{"20L":1059.10,"2.5L":163.50},
+"8260 Antyczny Dąb":{"20L":1160.00,"2.5L":176.10},
+"8170 Orzech włoski":{"20L":1160.00,"2.5L":176.10},
+"8320 Teak":{"20L":1160.00,"2.5L":176.10},
+"2380 Modrzew":{"20L":1160.00,"2.5L":176.10},
+"8270 Drzewo orzechowe":{"20L":1160.00,"2.5L":176.10},
+"8285 Mahoń":{"20L":1160.00,"2.5L":176.10},
+"8450 Palisander":{"20L":1160.00,"2.5L":176.10},
+"5449 Błękitny":{"20L":1059.10,"2.5L":163.50},
+"8402 Mango":{"20L":1059.10,"2.5L":163.50},
+"8403 Melon":{"20L":1160.00,"2.5L":176.10},
+"3180 Szwedzka czerwień":{"20L":1160.00,"2.5L":176.10},
+"8410 Pistacja":{"20L":1160.00,"2.5L":176.10},
+"6486 Jodłowa zieleń":{"20L":1059.10,"2.5L":163.50},
+"1105 Biały":{"20L":1160.00,"2.5L":176.10},
+"9995 Heban":{"20L":1160.00,"2.5L":176.10}
+};
+
+function updateKalkulator(){
+const pow = parseFloat(document.getElementById('powierzchnia').value)||0;
+const rodzajEl = document.querySelector('input[name="rodzaj"]:checked');
+const kolor = document.getElementById('kolor').value;
+
+// Holzlasur
+let holz20=0, holz2=0;
+if(pow>0 && kolor && cenyHolzlasur[kolor]){
+const wydajnosc=6;
+let potrzebneL = pow/wydajnosc;
+holz20 = Math.floor(potrzebneL/20);
+let pozostaleL = potrzebneL - holz20*20;
+holz2 = Math.ceil(pozostaleL/2.5);
+document.getElementById('holz20_qty').innerText = holz20>0?holz20:'-';
+document.getElementById('holz2_qty').innerText = holz2>0?holz2:'-';
+document.getElementById('holz20_price').innerText = holz20>0?(holz20*cenyHolzlasur[kolor]["20L"]).toFixed(2)+' zł':'-';
+document.getElementById('holz2_price').innerText = holz2>0?(holz2*cenyHolzlasur[kolor]["2.5L"]).toFixed(2)+' zł':'-';
+}else{
+document.getElementById('holz20_qty').innerText='-';
+document.getElementById('holz2_qty').innerText='-';
+document.getElementById('holz20_price').innerText='-';
+document.getElementById('holz2_price').innerText='-';
+}
+
+// Uniepalniacz
+const zuzycieUn = 460*pow/1000;
+let uni125=Math.floor(zuzycieUn/12.5);
+let uni6 = Math.ceil((zuzycieUn - uni125*12.5)/6);
+const cenaUni125=196.80;
+const cenaUni6=98.40;
+document.getElementById('uni125_qty').innerText = uni125>0?uni125:'-';
+document.getElementById('uni6_qty').innerText = uni6>0?uni6:'-';
+document.getElementById('uni125_price').innerText = uni125>0?(uni125*cenaUni125).toFixed(2)+' zł':'-';
+document.getElementById('uni6_price').innerText = uni6>0?(uni6*cenaUni6).toFixed(2)+' zł':'-';
+const sumUni = uni125*cenaUni125 + uni6*cenaUni6;
+
+// Kuprafung-D
+let kup5=0,kup1=0,sumKup=0;
+if(rodzajEl && rodzajEl.value==='zewnatrz'){
+const kuprafungKg = uni125*3 + uni6*1.5;
+kup5 = Math.floor(kuprafungKg/5);
+kup1 = Math.ceil(kuprafungKg - kup5*5);
+const cenaKup5=113.60;
+const cenaKup1=59.00;
+sumKup = kup5*cenaKup5 + kup1*cenaKup1;
+document.getElementById('kup5_qty').innerText = kup5>0?kup5:'-';
+document.getElementById('kup1_qty').innerText = kup1>0?kup1:'-';
+document.getElementById('kup5_price').innerText = kup5>0?(kup5*cenaKup5).toFixed(2)+' zł':'-';
+document.getElementById('kup1_price').innerText = kup1>0?(kup1*cenaKup1).toFixed(2)+' zł':'-';
+}else{
+document.getElementById('kup5_qty').innerText='-';
+document.getElementById('kup1_qty').innerText='-';
+document.getElementById('kup5_price').innerText='-';
+document.getElementById('kup1_price').innerText='-';
+sumKup=0;
+}
+
+// sumy
+const sumHolz = (holz20*cenyHolzlasur[kolor]?.["20L"] || 0) + (holz2*cenyHolzlasur[kolor]?.["2.5L"] || 0);
+document.getElementById('sum_holz').innerText = sumHolz.toFixed(2)+' zł';
+document.getElementById('sum_uni').innerText = sumUni.toFixed(2)+' zł';
+document.getElementById('sum_kup').innerText = sumKup.toFixed(2)+' zł';
+document.getElementById('total_brutto').innerText = 'Całość brutto: '+(sumHolz+sumUni+sumKup).toFixed(2)+' zł';
+}
+
+document.getElementById('powierzchnia').addEventListener('input', updateKalkulator);
+document.getElementById('kolor').addEventListener('change', updateKalkulator);
+document.querySelectorAll('input[name="rodzaj"]').forEach(el=>el.addEventListener('change', updateKalkulator));
+window.addEventListener('load', updateKalkulator);
+</script>
+
+</body>
+</html>
