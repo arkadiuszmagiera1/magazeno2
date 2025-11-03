@@ -5,23 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Magazeno_2</title>
 <style>
-  :root{
-    --bg: #0e0e0e;
-    --tile-bg: #1a1a1a;
-    --tile-border: #333;
-    --muted: rgba(255,255,255,0.6);
+  :root {
+    --bg-light: #f9fafb;
+    --bg-dark: #0e0e0e;
+    --tile-light: #ffffff;
+    --tile-dark: #1a1a1a;
+    --tile-border-light: #ddd;
+    --tile-border-dark: #333;
+    --muted-light: rgba(0,0,0,0.6);
+    --muted-dark: rgba(255,255,255,0.6);
   }
 
-  *{box-sizing:border-box}
+  * { box-sizing: border-box; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
+
   body {
     font-family: "Inter", sans-serif;
     margin: 0;
-    background-color: var(--bg);
+    background-color: var(--bg-dark);
     color: #f0f0f0;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  body.light {
+    background-color: var(--bg-light);
+    color: #111;
+  }
+
+  /* 🔘 Przełącznik trybu jasny/ciemny */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 56px;
+    height: 30px;
+    background: #3b3b3b;
+    border-radius: 9999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    transition: background 0.3s;
+  }
+  .theme-toggle::before {
+    content: "";
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.3s, background 0.3s;
+  }
+  body.light .theme-toggle {
+    background: #3b82f6;
+  }
+  body.light .theme-toggle::before {
+    transform: translateX(26px);
+    background: #f9fafb;
   }
 
   .login-container {
@@ -39,13 +81,18 @@
   }
 
   input {
-    background: var(--tile-bg);
+    background: var(--tile-dark);
     color: white;
     border: 1px solid #444;
     padding: 10px;
     border-radius: 8px;
     width: 220px;
     text-align: center;
+  }
+  body.light input {
+    background: #fff;
+    color: #111;
+    border-color: #ccc;
   }
 
   button {
@@ -57,8 +104,17 @@
     cursor: pointer;
     transition: 0.18s ease;
   }
-
-  button:hover { background: #444; transform: translateY(-1px); }
+  body.light button {
+    background: #e5e7eb;
+    color: #111;
+  }
+  button:hover {
+    background: #444;
+    transform: translateY(-1px);
+  }
+  body.light button:hover {
+    background: #d1d5db;
+  }
 
   .menu {
     display: none;
@@ -83,8 +139,8 @@
   }
 
   .tile {
-    background: var(--tile-bg);
-    border: 1px solid var(--tile-border);
+    background: var(--tile-dark);
+    border: 1px solid var(--tile-border-dark);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -109,6 +165,30 @@
     transform: translateY(-6px) scale(1.02);
   }
 
+  body.light .tile {
+    background: var(--tile-light);
+    color: #111;
+    border-color: var(--tile-border-light);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  }
+  body.light .tile:hover {
+    background: #f3f4f6;
+  }
+
+  /* Kafelek „W przygotowaniu” */
+  .tile.soon {
+    opacity: 0.7;
+    font-style: italic;
+    cursor: not-allowed;
+  }
+  .tile.soon:hover {
+    transform: none;
+    background: var(--tile-dark);
+  }
+  body.light .tile.soon:hover {
+    background: var(--tile-light);
+  }
+
   @media (max-width: 1400px) {
     .tiles { grid-template-columns: repeat(4, 1fr); }
   }
@@ -130,47 +210,54 @@
     bottom: 10px;
     right: 15px;
     font-size: 13px;
-    color: var(--muted);
+    color: var(--muted-dark);
+  }
+  body.light footer {
+    color: var(--muted-light);
   }
 </style>
 </head>
 <body>
 
-  <!-- Logowanie -->
-  <div class="login-container" id="loginContainer">
-    <h1>Magazeno_2</h1>
-    <input type="text" id="username" placeholder="Login" autocomplete="off" />
-    <input type="password" id="password" placeholder="Hasło" style="display:none;" />
-    <div style="display:flex; gap:10px;">
-      <button id="loginButton">Dalej</button>
-      <button id="logoutButton" style="display:none;">Wyloguj</button>
-    </div>
-  </div>
+<!-- 🔘 Przełącznik trybu jasny/ciemny -->
+<div class="theme-toggle" id="themeToggle" title="Zmień tryb"></div>
 
-  <!-- Menu główne -->
-  <div class="menu" id="menu">
-    <div class="tiles" id="tiles">
-      <div class="tile" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
-      <div class="tile" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
-      <div class="tile" data-file="kalkulator_nro.html">Kalkulator do zabezpieczania wyrobów z drewna przed działaniem ognia (NRO)</div>
-      <div class="tile" data-file="kafelek4.html">Kafelek 4</div>
-      <div class="tile" data-file="kafelek5.html">Kafelek 5</div>
-      <div class="tile" data-file="kafelek6.html">Kafelek 6</div>
-      <div class="tile" data-file="kafelek7.html">Kafelek 7</div>
-      <div class="tile" data-file="kafelek8.html">Kafelek 8</div>
-      <div class="tile" data-file="kafelek9.html">Kafelek 9</div>
-      <div class="tile" data-file="kafelek10.html">Kafelek 10</div>
-      <div class="tile" data-file="kafelek11.html">Kafelek 11</div>
-      <div class="tile" data-file="kafelek12.html">Kafelek 12</div>
-      <div class="tile" data-file="kafelek13.html">Kafelek 13</div>
-      <div class="tile" data-file="kafelek14.html">Kafelek 14</div>
-      <div class="tile" data-file="kafelek15.html">Kafelek 15</div>
-    </div>
+<!-- Logowanie -->
+<div class="login-container" id="loginContainer">
+  <h1>Magazeno_2</h1>
+  <input type="text" id="username" placeholder="Login" autocomplete="off" />
+  <input type="password" id="password" placeholder="Hasło" style="display:none;" />
+  <div style="display:flex; gap:10px;">
+    <button id="loginButton">Dalej</button>
+    <button id="logoutButton" style="display:none;">Wyloguj</button>
   </div>
+</div>
 
-  <footer>Wersja 1.1 wykonana przez #ar_mag</footer>
+<!-- Menu główne -->
+<div class="menu" id="menu">
+  <div class="tiles" id="tiles">
+    <div class="tile" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
+    <div class="tile" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
+    <div class="tile" data-file="kalkulator_nro.html">Kalkulator do zabezpieczania wyrobów z drewna przed działaniem ognia (NRO)</div>
+    <div class="tile" data-file="kreator_tarasu_4.html">W przygotowaniu — Kreator tarasów</div>
+    <div class="tile" data-file="kafelek5.html">Kafelek 5</div>
+    <div class="tile" data-file="kafelek6.html">Kafelek 6</div>
+    <div class="tile" data-file="kafelek7.html">Kafelek 7</div>
+    <div class="tile" data-file="kafelek8.html">Kafelek 8</div>
+    <div class="tile" data-file="kafelek9.html">Kafelek 9</div>
+    <div class="tile" data-file="kafelek10.html">Kafelek 10</div>
+    <div class="tile" data-file="kafelek11.html">Kafelek 11</div>
+    <div class="tile" data-file="kafelek12.html">Kafelek 12</div>
+    <div class="tile" data-file="kafelek13.html">Kafelek 13</div>
+    <div class="tile" data-file="kafelek14.html">Kafelek 14</div>
+    <div class="tile" data-file="kafelek15.html">Kafelek 15</div>
+  </div>
+</div>
+
+<footer>Wersja 1.2 wykonana przez #ar_mag</footer>
 
 <script>
+/* Logika logowania */
 const users = ["User1#", "User2#", "User3#"];
 const password = "1234";
 const loginContainer = document.getElementById("loginContainer");
@@ -242,6 +329,16 @@ usernameInput.addEventListener("keydown", (e) => {
 });
 passwordInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") loginButton.click();
+});
+
+/* Tryb jasny/ciemny */
+const toggle = document.getElementById("themeToggle");
+if (localStorage.getItem("theme") === "light") {
+  document.body.classList.add("light");
+}
+toggle.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
 });
 </script>
 
