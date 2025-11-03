@@ -24,7 +24,6 @@
     justify-content: center;
   }
 
-  /* Ekran logowania */
   .login-container {
     display: flex;
     flex-direction: column;
@@ -61,9 +60,8 @@
 
   button:hover { background: #444; transform: translateY(-1px); }
 
-  /* Pulpit */
   .menu {
-    display: none; /* pokazujemy po zalogowaniu */
+    display: none;
     flex-direction: column;
     align-items: center;
     width: 100%;
@@ -72,7 +70,6 @@
     gap: 12px;
   }
 
-  /* grid: 5 kolumn x 3 wiersze tak jak chciałeś */
   .tiles {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -85,7 +82,6 @@
     align-items: center;
   }
 
-  /* kafelek - trochę mniejszy niż jakby był pełne 900px */
   .tile {
     background: var(--tile-bg);
     border: 1px solid var(--tile-border);
@@ -100,10 +96,9 @@
     text-align: center;
     padding: 14px;
     font-size: 15px;
-    /* zamiast stałych 750x750 używamy procentowego wymiaru wewnątrz komórki siatki */
     width: 100%;
     height: 100%;
-    max-width: 300px; /* ograniczenie by na dużych ekranach nie były gigantyczne */
+    max-width: 300px;
     max-height: 300px;
     min-width: 180px;
     min-height: 180px;
@@ -114,7 +109,6 @@
     transform: translateY(-6px) scale(1.02);
   }
 
-  /* responsywność: na mniejszych ekranach zmniejszamy liczbę kolumn */
   @media (max-width: 1400px) {
     .tiles { grid-template-columns: repeat(4, 1fr); }
   }
@@ -156,10 +150,9 @@
   <!-- Menu główne -->
   <div class="menu" id="menu">
     <div class="tiles" id="tiles">
-      <!-- Każdy kafelek ma data-file z nazwą pliku docelowego (puste -> alert) -->
       <div class="tile" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
-      <div class="tile" data-file="kalkulator-farby-i-biocydu-porownanie.html">Kalkulator farby i biocydu — porównanie</div>
-      <div class="tile" data-file="kafelek3.html">Kafelek 3</div>
+      <div class="tile" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
+      <div class="tile" data-file="kalkulator_nro.html">Kalkulator do zabezpieczania wyrobów z drewna przed działaniem ognia (NRO)</div>
       <div class="tile" data-file="kafelek4.html">Kafelek 4</div>
       <div class="tile" data-file="kafelek5.html">Kafelek 5</div>
       <div class="tile" data-file="kafelek6.html">Kafelek 6</div>
@@ -178,11 +171,8 @@
   <footer>Wersja 1.1 wykonana przez #ar_mag</footer>
 
 <script>
-/* DANE LOGOWANIA - możesz zmienić */
 const users = ["User1#", "User2#", "User3#"];
 const password = "1234";
-
-/* ELEMENTY DOM */
 const loginContainer = document.getElementById("loginContainer");
 const menu = document.getElementById("menu");
 const usernameInput = document.getElementById("username");
@@ -191,7 +181,6 @@ const loginButton = document.getElementById("loginButton");
 const logoutButton = document.getElementById("logoutButton");
 const tilesContainer = document.getElementById("tiles");
 
-/* Inicjalizacja - jeśli już zalogowany w sesji */
 function showMenu() {
   loginContainer.style.display = "none";
   menu.style.display = "flex";
@@ -212,10 +201,8 @@ if (sessionStorage.getItem("loggedIn") === "true") {
   showLogin();
 }
 
-/* Logika przycisku dalej / hasło */
 loginButton.addEventListener("click", () => {
   if (passwordInput.style.display === "none") {
-    // krok 1: sprawdź login
     if (users.includes(usernameInput.value.trim())) {
       passwordInput.style.display = "block";
       usernameInput.disabled = true;
@@ -224,7 +211,6 @@ loginButton.addEventListener("click", () => {
       alert("Nieprawidłowy login");
     }
   } else {
-    // krok 2: sprawdź hasło
     if (passwordInput.value === password) {
       sessionStorage.setItem("loggedIn", "true");
       showMenu();
@@ -234,31 +220,23 @@ loginButton.addEventListener("click", () => {
   }
 });
 
-/* Wyloguj (czyszczenie sesji) */
 logoutButton.addEventListener("click", () => {
   sessionStorage.removeItem("loggedIn");
   usernameInput.value = "";
   showLogin();
 });
 
-/* Obsługa kliknięć kafelków:
-   - jeśli data-file istnieje i nie jest puste -> przekieruj
-   - jeśli puste -> alert
-*/
 tilesContainer.addEventListener("click", (e) => {
-  // znajdź najbliższy element z klasą 'tile'
   const tile = e.target.closest(".tile");
   if (!tile) return;
   const file = tile.getAttribute("data-file");
   if (file && file.trim() !== "") {
-    // przekierowanie — upewnij się, że plik istnieje po stronie serwera/folderu
     window.location.href = file;
   } else {
     alert("Ten kafelek jest jeszcze pusty 😄");
   }
 });
 
-/* Ustawienie obsługi klawisza Enter przy polach (dla wygody) */
 usernameInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") loginButton.click();
 });
