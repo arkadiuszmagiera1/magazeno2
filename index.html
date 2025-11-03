@@ -14,7 +14,7 @@
     --tile-border-dark: #333;
     --muted-light: rgba(0,0,0,0.6);
     --muted-dark: rgba(255,255,255,0.6);
-    --bar-gradient: linear-gradient(90deg, rgba(16,185,129,0.25), rgba(59,130,246,0.25), rgba(16,185,129,0.25));
+    --bar-gradient: linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.15), rgba(255,255,255,0.25));
   }
 
   * { box-sizing: border-box; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
@@ -186,6 +186,19 @@
   @keyframes barMove {
     0% { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
+  }
+
+  /* ✨ Subtelny pulsujący efekt poświaty */
+  .tile.active {
+    animation: glowPulse 5s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 0 8px 18px rgba(255,255,255,0.15);
+    }
+    50% {
+      box-shadow: 0 8px 22px rgba(255,255,255,0.35);
+    }
   }
 
   .tile:hover {
