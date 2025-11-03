@@ -14,6 +14,7 @@
     --tile-border-dark: #333;
     --muted-light: rgba(0,0,0,0.6);
     --muted-dark: rgba(255,255,255,0.6);
+    --bar-gradient: linear-gradient(90deg, rgba(16,185,129,0.3), rgba(59,130,246,0.3), rgba(16,185,129,0.3));
   }
 
   * { box-sizing: border-box; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
@@ -34,6 +35,7 @@
     color: #111;
   }
 
+  /* 🔘 Przełącznik trybu jasny/ciemny */
   .theme-toggle {
     position: fixed;
     top: 16px;
@@ -128,16 +130,17 @@
   .tiles {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-auto-rows: 1fr;
     gap: 18px;
     width: 92%;
     max-width: 1600px;
-    height: calc(100vh - 140px);
+    height: auto;
     justify-items: center;
-    align-items: center;
+    align-items: start;
+    padding-bottom: 40px;
   }
 
   .tile {
+    position: relative;
     background: var(--tile-dark);
     border: 1px solid var(--tile-border-dark);
     border-radius: 12px;
@@ -145,9 +148,6 @@
     align-items: center;
     justify-content: center;
     color: white;
-    cursor: pointer;
-    transition: transform 0.18s ease, background 0.18s ease;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.45);
     text-align: center;
     padding: 14px;
     font-size: 15px;
@@ -157,11 +157,10 @@
     max-height: 300px;
     min-width: 180px;
     min-height: 180px;
-  }
-
-  .tile:hover {
-    background: #2a2a2a;
-    transform: translateY(-6px) scale(1.02);
+    overflow: hidden;
+    z-index: 1;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.45);
   }
 
   body.light .tile {
@@ -170,30 +169,46 @@
     border-color: var(--tile-border-light);
     box-shadow: 0 8px 18px rgba(0,0,0,0.15);
   }
-  body.light .tile:hover {
-    background: #f3f4f6;
+
+  /* 🔹 delikatny pasek animowany u góry aktywnych kafelków */
+  .tile.active::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 3px;
+    background: var(--bar-gradient);
+    background-size: 200% 100%;
+    animation: barMove 6s linear infinite;
+  }
+
+  @keyframes barMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  .tile:hover {
+    transform: translateY(-5px) scale(1.02);
   }
 
   .tile.soon {
-    opacity: 0.7;
-    font-style: italic;
+    opacity: 0.6;
     cursor: not-allowed;
+    font-style: italic;
   }
 
   @media (max-width: 1400px) {
     .tiles { grid-template-columns: repeat(4, 1fr); }
   }
   @media (max-width: 1100px) {
-    .tiles { grid-template-columns: repeat(3, 1fr); height: auto; }
-    .tile { max-width: 260px; max-height: 260px; }
+    .tiles { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 700px) {
     .tiles { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .tile { max-width: 220px; max-height: 220px; font-size: 14px; }
   }
   @media (max-width: 420px) {
     .tiles { grid-template-columns: 1fr; }
-    .tile { max-width: 320px; width: 90vw; height: auto; padding: 18px; }
   }
 
   footer {
@@ -224,32 +239,29 @@
 
 <div class="menu" id="menu">
   <div class="tiles" id="tiles">
-    <div class="tile" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
-    <div class="tile" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
-    <div class="tile" data-file="kalkulator_nro.html">Kalkulator NRO – zabezpieczenia ogniowe</div>
+    <div class="tile active" data-file="optymalizacja.html">Optymalizacja cięcia KVH i BSH</div>
+    <div class="tile active" data-file="kalkulator_farby_i_biocydu.html">Kalkulator farby i biocydu — porównanie</div>
+    <div class="tile active" data-file="kalkulator_nro.html">Kalkulator NRO — zabezpieczenie przed ogniem</div>
     <div class="tile soon" data-file="kreator_tarasu_4.html">W przygotowaniu — Kreator tarasów</div>
-    <div class="tile" data-file="Wycena_KVH_BSH.html">Wycena KVH / BSH</div>
-    <div class="tile" data-file="kafelek6.html">Kafelek 6</div>
-    <div class="tile" data-file="kafelek7.html">Kafelek 7</div>
-    <div class="tile" data-file="kafelek8.html">Kafelek 8</div>
-    <div class="tile" data-file="kafelek9.html">Kafelek 9</div>
-    <div class="tile" data-file="kafelek10.html">Kafelek 10</div>
-    <div class="tile" data-file="kafelek11.html">Kafelek 11</div>
-    <div class="tile" data-file="kafelek12.html">Kafelek 12</div>
-    <div class="tile" data-file="kafelek13.html">Kafelek 13</div>
-    <div class="tile" data-file="kafelek14.html">Kafelek 14</div>
-    <div class="tile" data-file="kafelek15.html">Kafelek 15</div>
+    <div class="tile active" data-file="Wycena_KVH_BSH.html">Wycena KVH/BSH</div>
+    <div class="tile soon" data-file="kafelek6.html">Kafelek 6</div>
+    <div class="tile soon" data-file="kafelek7.html">Kafelek 7</div>
+    <div class="tile soon" data-file="kafelek8.html">Kafelek 8</div>
+    <div class="tile soon" data-file="kafelek9.html">Kafelek 9</div>
+    <div class="tile soon" data-file="kafelek10.html">Kafelek 10</div>
+    <div class="tile soon" data-file="kafelek11.html">Kafelek 11</div>
+    <div class="tile soon" data-file="kafelek12.html">Kafelek 12</div>
+    <div class="tile soon" data-file="kafelek13.html">Kafelek 13</div>
+    <div class="tile soon" data-file="kafelek14.html">Kafelek 14</div>
+    <div class="tile soon" data-file="kafelek15.html">Kafelek 15</div>
   </div>
 </div>
 
-<footer>Wersja 1.3 wykonana przez #ar_mag</footer>
+<footer>Wersja 1.5 — by #ar_mag</footer>
 
 <script>
 const users = ["User1#", "User2#", "User3#", "User4#", "User5#"];
-const passwords = {
-  "User1#": "1234",
-  "User2#": "12345"
-};
+const passwords = { "User1#": "1234", "User2#": "12345" };
 const defaultPassword = "1234";
 
 const loginContainer = document.getElementById("loginContainer");
@@ -274,30 +286,23 @@ function showLogin() {
   passwordInput.value = "";
 }
 
-if (sessionStorage.getItem("loggedIn") === "true") {
-  showMenu();
-} else {
-  showLogin();
-}
+if (sessionStorage.getItem("loggedIn") === "true") showMenu();
+else showLogin();
 
 loginButton.addEventListener("click", () => {
-  const username = usernameInput.value.trim();
+  const user = usernameInput.value.trim();
   if (passwordInput.style.display === "none") {
-    if (users.includes(username)) {
+    if (users.includes(user)) {
       passwordInput.style.display = "block";
       usernameInput.disabled = true;
       passwordInput.focus();
-    } else {
-      alert("Nieprawidłowy login");
-    }
+    } else alert("Nieprawidłowy login");
   } else {
-    const correctPassword = passwords[username] || defaultPassword;
+    const correctPassword = passwords[user] || defaultPassword;
     if (passwordInput.value === correctPassword) {
       sessionStorage.setItem("loggedIn", "true");
       showMenu();
-    } else {
-      alert("Nieprawidłowe hasło");
-    }
+    } else alert("Nieprawidłowe hasło");
   }
 });
 
@@ -309,28 +314,16 @@ logoutButton.addEventListener("click", () => {
 
 tilesContainer.addEventListener("click", (e) => {
   const tile = e.target.closest(".tile");
-  if (!tile) return;
+  if (!tile || tile.classList.contains("soon")) return;
   const file = tile.getAttribute("data-file");
-  if (tile.classList.contains("soon")) {
-    alert("Ten moduł jest jeszcze w przygotowaniu 😄");
-    return;
-  }
-  if (file && file.trim() !== "") {
-    window.location.href = file;
-  }
+  if (file && file.trim() !== "") window.location.href = file;
 });
 
-usernameInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") loginButton.click();
-});
-passwordInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") loginButton.click();
-});
+usernameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") loginButton.click(); });
+passwordInput.addEventListener("keydown", (e) => { if (e.key === "Enter") loginButton.click(); });
 
 const toggle = document.getElementById("themeToggle");
-if (localStorage.getItem("theme") === "light") {
-  document.body.classList.add("light");
-}
+if (localStorage.getItem("theme") === "light") document.body.classList.add("light");
 toggle.addEventListener("click", () => {
   document.body.classList.toggle("light");
   localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
