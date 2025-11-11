@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator farby i biocydu — porównanie</title>
+<style>
+:root {
+  --border: #e5e7eb;
+  --radius: 14px;
+  --bg-light: linear-gradient(180deg, #f9fafb 0%, #f1f5f9 100%);
+  --bg-dark: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  --shadow-light: 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-dark: 0 4px 12px rgba(0,0,0,0.4);
+  --font: 'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
+body { font-family: var(--font); margin:0; padding: 40px 20px; background: var(--bg-light); color: #000; }
+body.dark { background: var(--bg-dark); color: #f9fafb; }
+header { text-align:center; margin-bottom:20px; }
+header img { width: 64px; height: 64px; }
+h1 { margin: 0; font-size: 22px; }
+.global-controls { display:flex; flex-wrap: wrap; gap:12px; justify-content: center; margin-bottom: 20px; text-align:center; }
+.global-controls label { display:block; font-weight:600; font-size:14px; margin-bottom:4px; }
+.global-controls input { width:120px; padding: 12px; border-radius: var(--radius); border:1px solid var(--border); font-size:18px; text-align:center; }
+.flex-container { display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+.product-card { flex: 1 1 250px; min-width: 250px; max-width: 300px; background: #fff; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 16px; }
+body.dark .product-card { background: #1f2937; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+label { display:block; margin-top:8px; font-weight:500; }
+select { width:100%; padding: 6px 8px; margin-top:4px; border:1px solid var(--border); border-radius:var(--radius); font-size:14px; text-align:center; text-align-last:center; }
+body.dark select { background:#374151; color:#f9fafb; border-color:#4b5563; }
+.result-row { display:flex; justify-content:space-between; margin-top:6px; }
+.result-title { font-weight:600; }
+.result-value { font-weight:700; }
+.buttons { text-align:center; margin-top:20px; }
+button { padding:10px 16px; margin:4px; border-radius:var(--radius); border:none; cursor:pointer; font-weight:500; }
+button.primary { background:#000; color:#fff; }
+body.dark button.primary { background:#60a5fa; color:#fff; }
+footer { text-align:center; margin-top:20px; font-size:13px; opacity:0.7; }
+.theme-toggle { position: fixed; top:16px; right:16px; width:56px; height:30px; background:#e5e7eb; border-radius:9999px; cursor:pointer; display:flex; align-items:center; padding:3px; }
+.theme-toggle::before { content:""; width:24px; height:24px; background:#fff; border-radius:50%; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition: transform 0.3s, background 0.3s; }
+body.dark .theme-toggle { background:#3b82f6; }
+body.dark .theme-toggle::before { transform:translateX(26px); background:#f9fafb; }
+</style>
+</head>
+<body>
+<div class="theme-toggle" id="themeToggle" title="Zmień tryb"></div>
+
+<header>
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRB9a9IJE4CflOrqHgspfKbNKI1RInQYoqIWw&s" alt="pędzel z farbą"/>
+  <h1>Kalkulator farby i biocydu — porównanie</h1>
+</header>
+
+<div class="global-controls">
+  <div>
+    <label for="globalArea">Powierzchnia m²</label>
+    <input type="number" id="globalArea" min="0" value="50"/>
+  </div>
+  <div>
+    <label for="globalCoatsPaint">Ilość warstw farby</label>
+    <input type="number" id="globalCoatsPaint" min="1" value="2"/>
+  </div>
+  <div>
+    <label for="globalCoatsPrimer">Ilość warstw biocydu</label>
+    <input type="number" id="globalCoatsPrimer" min="0" value="1"/>
+  </div>
+</div>
+
+<div class="flex-container" id="productsContainer"></div>
+
+<footer>Wersja 2.0 — stworzona przez #ar_mag</footer>
+
+<script>
+const productsData = {
+  osmo: {
+    name:"OSMO Olej Lazurowy", coverage:24, cans:[2.5,0.75],
+    colors: {
+      "700 Sosna": {"0.75":190.37,"2.5":573.64},
+      "702 Modrzew": {"0.75":190.37,"2.5":573.64},
+      "703 Mahoń": {"0.75":190.37,"2.5":573.64},
+      "706 Dąb": {"0.75":190.37,"2.5":573.64},
+      "707 Orzech": {"0.75":190.37,"2.5":573.64},
+      "708 Teak": {"0.75":190.37,"2.5":573.64},
+      "710 Pinia": {"0.75":190.37,"2.5":573.64},
+      "712 Heban": {"0.75":190.37,"2.5":573.64},
+      "727 Palisander": {"0.75":190.37,"2.5":573.64},
+      "728 Cedr": {"0.75":190.37,"2.5":573.64},
+      "731 Daglezja": {"0.75":190.37,"2.5":573.64},
+      "732 Jasny Dąb": {"0.75":190.37,"2.5":573.64},
+      "739 Srebrny Szary": {"0.75":190.37,"2.5":573.64},
+      "900 Biały": {"0.75":190.37,"2.5":573.64},
+      "903 Szarość Bazaltowa": {"0.75":190.37,"2.5":573.64},
+      "905 Patyna": {"0.75":190.37,"2.5":573.64},
+      "906 Perłowy Szary": {"0.75":190.37,"2.5":573.64},
+      "907 Kwarcowy Szary": {"0.75":190.37,"2.5":573.64},
+      "UV Extra Bezbarwny": {"0.75":168.37,"2.5":508.37}
+    }
+  },
+  koopmansImpra: {name:"Koopmans Impra", coverage:10, cans:[2.5],
+    colors: {"UV":{"2.5":101.05},"Kolor standard":{"2.5":113.05},"Szarości 020,030,040":{"2.5":129.99}}
+  },
+  koopmansEcoolie: {name:"Koopmans Ecoolie", coverage:10, cans:[2.5],
+    colors: {"UV":{"2.5":201.05},"Kolor standard":{"2.5":201.05},"Szarości + biały":{"2.5":215.12}}
+  },
+  koopmansWD660: {name:"Koopmans WD 660", coverage:10, cans:[5], colors: {"Wszystkie":{"5":330.00}}},
+  dorken: {name:"Dorken Holzlasur 5,1", coverage:10, cans:[2.5,20],
+    colors: {
+      "Bezbarwny":{"2.5":151.50,"20":963.20},
+      "2360 Klonowy":{"2.5":176.10,"20":1160.00},
+      "2370 Jawor":{"2.5":155.20,"20":992.70},
+      "6570 Jasny Dąb":{"2.5":176.10,"20":1160.00},
+      "2335 Sosna":{"2.5":176.10,"20":1160.00},
+      "8220 Afromosia":{"2.5":163.50,"20":1059.10},
+      "8260 Antyczny Dąb":{"2.5":176.10,"20":1160.00},
+      "8170 Orzech włoski":{"2.5":176.10,"20":1160.00},
+      "8320 Teak":{"2.5":176.10,"20":1160.00},
+      "2380 Modrzew":{"2.5":176.10,"20":1160.00},
+      "8270 Drzewo orzechowe":{"2.5":176.10,"20":1160.00},
+      "8285 Mahoń":{"2.5":176.10,"20":1160.00},
+      "8450 Palisander":{"2.5":176.10,"20":1160.00},
+      "5449 Błękitny":{"2.5":163.50,"20":1059.10},
+      "8402 Mango":{"2.5":163.50,"20":1059.10},
+      "8403 Melon":{"2.5":176.10,"20":1160.00},
+      "3180 Szwedzka czerwień":{"2.5":176.10,"20":1160.00},
+      "8410 Pistacja":{"2.5":176.10,"20":1160.00},
+      "6486 Jodłowa zieleń":{"2.5":163.50,"20":1059.10},
+      "1105 Biały":{"2.5":176.10,"20":1160.00},
+      "9995 Heban":{"2.5":176.10,"20":1160.00},
+      "7355 Lodowcowy szary":{"2.5":163.50,"20":1059.10},
+      "7360 Alpejski szary":{"2.5":163.50,"20":1059.10},
+      "7365 Wulkaniczny szary":{"2.5":163.50,"20":1059.10},
+      "7371 Ziemisty szary":{"2.5":163.50,"20":1059.10},
+      "7370 Błękitno szary":{"2.5":163.50,"20":1059.10},
+      "7375 Szary antyczny":{"2.5":176.10,"20":1160.00},
+      "7380 Szary kwarcowy":{"2.5":163.50,"20":1059.10}
+    }
+  }
+};
+
+const primer = { name:"Extra Primer", cans:[5,2], prices:{"2":119.22,"5":256.80} };
+
+function pickPrimerCans(area, coverageMap){
+  const sorted = Object.keys(coverageMap).map(Number).sort((a,b)=>b-a);
+  let rem = area;
+  const res = {};
+  for(const s of sorted){
+    const cover = coverageMap[s];
+    const count = Math.floor(rem / cover);
+    if(count>0){
+      res[s] = count;
+      rem -= cover*count;
+    }
+  }
+  if(rem>0){
+    const smallest = sorted[sorted.length-1];
+    res[smallest] = (res[smallest] || 0) + 1;
+  }
+  return res;
+}
+
+function pickCans(liters, sizes){
+  const sorted = sizes.slice().map(Number).sort((a,b)=>b-a);
+  let rem = liters;
+  const res = {};
+  for(const s of sorted){
+    const count = Math.floor(rem / s);
+    if(count>0){ res[s] = count; rem -= count*s; }
+  }
+  if(rem>0){ const smallest = sorted[sorted.length-1]; res[smallest]=(res[smallest]||0)+1; }
+  return res;
+}
+
+function formatCans(cans){
+  return Object.entries(cans).map(([s,c])=>`${c}×${s}L`).join(", ");
+}
+
+function createProductCard(key,data){
+  const card=document.createElement("div");
+  card.className="product-card";
+  card.innerHTML=`
+    <h3>${data.name}</h3>
+    <label>Kolor:</label>
+    <select class="colorSelect"><option value="">— wybierz kolor —</option></select>
+    <div class="result-row"><span>Farba:</span><span class="paintLiters"></span></div>
+    <div class="result-row"><span>Puszki farby:</span><span class="paintCans"></span></div>
+    <div class="result-row"><span>Koszt farby:</span><span class="paintCost"></span></div>
+    <div class="result-row"><span>Puszki biocydu:</span><span class="primerCans"></span></div>
+    <div class="result-row"><span>Koszt biocydu:</span><span class="primerCost"></span></div>
+    <div class="result-row"><span>Łącznie:</span><span class="totalCost"></span></div>
+  `;
+  const selectColor = card.querySelector(".colorSelect");
+  for(const color in data.colors){ selectColor.innerHTML += `<option value="${color}">${color}</option>`; }
+
+  function updateCard(){
+    const area = parseFloat(document.getElementById("globalArea").value)||0;
+    const coatsPaint = parseInt(document.getElementById("globalCoatsPaint").value)||1;
+    const coatsPrimer = parseInt(document.getElementById("globalCoatsPrimer").value)||0;
+    const color = selectColor.value;
+
+    const paintLitersEl = card.querySelector(".paintLiters");
+    const paintCansEl = card.querySelector(".paintCans");
+    const paintCostEl = card.querySelector(".paintCost");
+    const primerCansEl = card.querySelector(".primerCans");
+    const primerCostEl = card.querySelector(".primerCost");
+    const totalCostEl = card.querySelector(".totalCost");
+
+    if(!color || area<=0){
+      paintLitersEl.textContent="";
+      paintCansEl.textContent="";
+      paintCostEl.textContent="";
+      primerCansEl.textContent="";
+      primerCostEl.textContent="";
+      totalCostEl.textContent="";
+      return;
+    }
+
+    const colorData = data.colors[color];
+    const paintLiters = (coatsPaint*area)/data.coverage;
+    const paintCans = pickCans(paintLiters,data.cans);
+    let paintCost=0;
+    for(const [s,c] of Object.entries(paintCans)){ paintCost+=c*colorData[s]; }
+
+    const primerCoverage = {5:40,2:18};
+    const totalPrimerArea = area*coatsPrimer;
+    const primerCans = pickPrimerCans(totalPrimerArea,primerCoverage);
+    let primerCost = 0;
+    for(const [s,c] of Object.entries(primerCans)){ primerCost+=c*primer.prices[s]; }
+
+    paintLitersEl.textContent = paintLiters.toFixed(2)+" L";
+    paintCansEl.textContent = formatCans(paintCans);
+    paintCostEl.textContent = paintCost.toFixed(2)+" zł";
+    primerCansEl.textContent = formatCans(primerCans);
+    primerCostEl.textContent = primerCost.toFixed(2)+" zł";
+    totalCostEl.textContent = (paintCost+primerCost).toFixed(2)+" zł";
+  }
+
+  selectColor.addEventListener("change",updateCard);
+  document.getElementById("globalArea").addEventListener("input",updateCard);
+  document.getElementById("globalCoatsPaint").addEventListener("input",updateCard);
+  document.getElementById("globalCoatsPrimer").addEventListener("input",updateCard);
+
+  return card;
+}
+
+const container = document.getElementById("productsContainer");
+for(const key in productsData){ container.appendChild(createProductCard(key,productsData[key])); }
+
+// Theme toggle
+const toggle=document.getElementById("themeToggle");
+if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
+toggle.addEventListener("click",()=>{
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",document.body.classList.contains("dark")?"dark":"light");
+});
+</script>
+</body>
+</html>
