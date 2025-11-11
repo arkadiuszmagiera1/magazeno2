@@ -152,7 +152,7 @@
 <div class="container">
   <h2>🪵 Optymalizacja cięcia drewna</h2>
   <p><strong>Wpisz dane</strong> — <em>oddziel długości średnikiem `;`</em>; przecinek (lub kropka) to część dziesiętna, np. <code>6,45</code> lub <code>4.3</code>.</p>
-  <p>Możesz podać ilość sztuk, np. <code>7x1,5</code>, <code>1,5x7</code> lub <code>8sztukx3</code> — program przeliczy to automatycznie.</p>
+  <p>Możesz podać ilość sztuk, np. <code>7x1,5</code> - gdzie pierwsza liczba w tym przypadku 7 to ilość sztuk a druga wartość to długość materiału — program przeliczy to automatycznie.</p>
   <pre>
 60x120 BSH - 3,5;7x1,25;8x4,2
 80x120 KVH - 3x5,1;4x3;2x2,5
@@ -184,7 +184,6 @@ function parseInput(input) {
     const items = lengthsText.split(';').map(x => x.trim()).filter(Boolean);
 
     for (let item of items) {
-      // Szuka np. 8x4,2 lub 4,2x8 lub 7x1,25
       const multiMatch = item.match(/(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)/);
       const reversedMatch = item.match(/(\d+[.,]?\d*)\s*[xX]\s*(\d+[.,]?\d*)/);
 
@@ -237,7 +236,6 @@ function optimizeCuts(materialType, lengths) {
     }
   }
 
-  // Konwersja końcówek na krótsze belki (6m lub 6,5m)
   const converted = [];
   for (let c of cuts) {
     if (c.remaining >= stockAlt && c.remaining < c.stock) {
@@ -305,7 +303,6 @@ function calculate() {
   resultDiv.textContent = output.trim();
 }
 
-// Dynamiczne przeliczanie
 document.getElementById('inputData').addEventListener('input', () => {
   calculate();
 });
